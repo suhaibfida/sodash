@@ -2,6 +2,12 @@
   "name": "sodash",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+
+    "api":"cd api && bun run dev",
+    "client":"cd client && bun run dev",
+    "dev": "bun run api && bun run client"
+  },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest"
