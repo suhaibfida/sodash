@@ -1,48 +1,114 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Globe, Recycle, User } from "lucide-react";
+
+import {
+  LayoutDashboard,
+  Globe,
+  Recycle,
+  User,
+} from "lucide-react";
+
 import WalletButton from "./WalletButton";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/web", label: "Web", icon: Globe },
-  { to: "/reclaim", label: "Reclaim Rent", icon: Recycle },
-  { to: "/profile", label: "Profile", icon: User },
+  {
+    to: "/",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    to: "/web",
+    label: "Web",
+    icon: Globe,
+  },
+  {
+    to: "/reclaim",
+    label: "Reclaim Rent",
+    icon: Recycle,
+  },
+  {
+    to: "/profile",
+    label: "Profile",
+    icon: User,
+  },
 ];
 
 const Navbar = () => {
   const location = useLocation();
 
   return (
-    <nav className="sketch-nav sticky top-0 z-50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid min-h-24 grid-cols-1 items-center gap-4 py-4 lg:grid-cols-[1fr_auto_1fr]">
-          <Link to="/" className="sketch-brand justify-self-start">
-            <div className="sketch-brand-mark">SD</div>
-            <span>Sodash</span>
-          </Link>
+    <nav className="navbar-shell">
 
-          <div className="sketch-tabs">
-            {navItems.map(({ to, label, icon: Icon }) => {
+      <div className="navbar-container">
+
+        {/* LEFT */}
+
+        <Link
+          to="/"
+          className="navbar-brand"
+        >
+
+          <div className="navbar-logo">
+            S
+          </div>
+
+          <div>
+
+            <div className="navbar-title">
+              Sodash
+            </div>
+
+            <div className="navbar-subtitle">
+              Solana Insights Engine
+            </div>
+
+          </div>
+
+        </Link>
+
+        {/* CENTER */}
+
+        <div className="navbar-tabs">
+
+          {navItems.map(
+            ({ to, label, icon: Icon }) => {
+
               const isActive =
-                to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+                to === "/"
+                  ? location.pathname === "/"
+                  : location.pathname.startsWith(
+                      to
+                    );
+
               return (
                 <Link
                   key={to}
                   to={to}
-                  className={`sketch-tab ${isActive ? "sketch-tab-active" : ""}`}
+                  className={`navbar-tab ${
+                    isActive
+                      ? "navbar-tab-active"
+                      : ""
+                  }`}
                 >
-                  <Icon size={15} />
+
+                  <Icon size={16} />
+
                   <span>{label}</span>
+
                 </Link>
               );
-            })}
-          </div>
+            }
+          )}
 
-          <div className="justify-self-end">
-            <WalletButton />
-          </div>
         </div>
+
+        {/* RIGHT */}
+
+        <div className="navbar-wallet">
+          <WalletButton />
+        </div>
+
       </div>
+
     </nav>
   );
 };
