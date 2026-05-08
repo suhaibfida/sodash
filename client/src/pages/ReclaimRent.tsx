@@ -123,10 +123,11 @@ const ReclaimRent = () => {
   const totalReclaimable = accounts
     .filter((a) => a.reclaimable)
     .reduce((sum, a) => sum + a.lamports, 0);
+  const visibleAccounts = accounts.slice(0, 6);
 
   if (!connected) {
     return (
-      <div className="dashboard-shell">
+      <div className="dashboard-shell reclaim-shell">
 
         <div className="reclaim-hero">
 
@@ -162,7 +163,7 @@ const ReclaimRent = () => {
   }
 
   return (
-    <div className="dashboard-shell">
+    <div className="dashboard-shell reclaim-shell">
 
       {/* HEADER */}
 
@@ -249,7 +250,7 @@ const ReclaimRent = () => {
           ))}
 
         </div>
-      ) : accounts.length === 0 ? (
+      ) : visibleAccounts.length === 0 ? (
         <div className="glass-card reclaim-empty">
 
           <CheckCircle2
@@ -265,7 +266,7 @@ const ReclaimRent = () => {
       ) : (
         <div className="reclaim-list">
 
-          {accounts.map((account) => {
+          {visibleAccounts.map((account) => {
 
             const isReclaimed =
               reclaimed.has(account.address);

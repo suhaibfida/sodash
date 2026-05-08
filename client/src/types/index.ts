@@ -114,6 +114,7 @@ export interface PnLData {
   byToken: {
     mint: string;
     symbol: string;
+    logo?: string;
     invested: number;
     current: number;
     pnl: number;

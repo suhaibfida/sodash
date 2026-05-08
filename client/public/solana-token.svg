@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Solana token">
+  <defs>
+    <linearGradient id="solGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="55%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0b1224" />
+  <g fill="url(#solGrad)">
+    <rect x="12" y="16" width="40" height="7" rx="3.5" transform="skewX(-16)" />
+    <rect x="12" y="29" width="40" height="7" rx="3.5" transform="skewX(-16)" />
+    <rect x="12" y="42" width="40" height="7" rx="3.5" transform="skewX(-16)" />
+  </g>
+</svg>

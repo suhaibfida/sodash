@@ -14,11 +14,11 @@ import {
   Copy,
   ExternalLink,
   X,
-  Users,
   ArrowRightLeft,
   ZoomIn,
   ZoomOut,
   Maximize,
+  Users,
 } from "lucide-react";
 
 import type {
@@ -33,8 +33,12 @@ import {
 } from "../lib/solana";
 
 const WebGraph = () => {
-  const { publicKey, connected } =
-    useWallet();
+
+  const { publicKey, connected } = useWallet();
+
+  /* =====================================
+     STATE
+  ===================================== */
 
   const [graphData, setGraphData] =
     useState<GraphData>({
@@ -76,19 +80,22 @@ const WebGraph = () => {
   const containerRef =
     useRef<HTMLDivElement>(null);
 
-  const isPanning = useRef(false);
+  const isPanning =
+    useRef(false);
 
-  const panStart = useRef({
-    x: 0,
-    y: 0,
-  });
+  const panStart =
+    useRef({
+      x: 0,
+      y: 0,
+    });
 
-  const viewBoxStart = useRef({
-    x: 0,
-    y: 0,
-    w: 1000,
-    h: 1000,
-  });
+  const viewBoxStart =
+    useRef({
+      x: 0,
+      y: 0,
+      w: 1000,
+      h: 1000,
+    });
 
   const DEFAULT_VB = {
     x: 0,
@@ -98,213 +105,108 @@ const WebGraph = () => {
   };
 
   /* =====================================
-     ZOOM
+     LOAD GRAPH
   ===================================== */
-
-  const zoomIn = useCallback(() => {
-    setViewBox((prev) => {
-      const scale = 0.8;
-
-      const nw = prev.w * scale;
-
-      return {
-        x:
-          prev.x +
-          (prev.w - nw) / 2,
-
-        y:
-          prev.y +
-          (prev.h - nw) / 2,
-
-        w: nw,
-        h: nw,
-      };
-    });
-  }, []);
-
-  const zoomOut = useCallback(() => {
-    setViewBox((prev) => {
-      const scale = 1.25;
-
-      const nw = Math.min(
-        prev.w * scale,
-        DEFAULT_VB.w * 3
-      );
-
-      return {
-        x:
-          prev.x +
-          (prev.w - nw) / 2,
-
-        y:
-          prev.y +
-          (prev.h - nw) / 2,
-
-        w: nw,
-        h: nw,
-      };
-    });
-  }, []);
-
-  const resetZoom = useCallback(() => {
-    setViewBox(DEFAULT_VB);
-  }, []);
-
-  /* =====================================
-     TRACKPAD ZOOM
-  ===================================== */
-
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      e.preventDefault();
-
-      const svg = svgRef.current;
-
-      if (!svg) return;
-
-      const rect =
-        svg.getBoundingClientRect();
-
-      const mx =
-        ((e.clientX - rect.left) /
-          rect.width) *
-          viewBox.w +
-        viewBox.x;
-
-      const my =
-        ((e.clientY - rect.top) /
-          rect.height) *
-          viewBox.h +
-        viewBox.y;
-
-      const scale =
-        e.deltaY > 0
-          ? 1.08
-          : 0.92;
-
-      const nw = Math.max(
-        220,
-        Math.min(
-          viewBox.w * scale,
-          DEFAULT_VB.w * 3
-        )
-      );
-
-      const nh = nw;
-
-      const nx =
-        mx -
-        ((mx - viewBox.x) /
-          viewBox.w) *
-          nw;
-
-      const ny =
-        my -
-        ((my - viewBox.y) /
-          viewBox.h) *
-          nh;
-
-      setViewBox({
-        x: nx,
-        y: ny,
-        w: nw,
-        h: nh,
-      });
-    },
-    [viewBox]
-  );
 
   useEffect(() => {
-    const svg = svgRef.current;
+    if (!publicKey || !connected) {
+      setGraphData({ nodes: [], links: [] });
+      return;
+    }
 
-    if (!svg) return;
+    let active = true;
 
-    svg.addEventListener(
-      "wheel",
-      handleWheel,
-      {
-        passive: false,
-      }
-    );
+    const loadGraph =
+      async () => {
+
+        try {
+          setLoading(true);
+
+          const data =
+            await getAddressInteractions(
+              publicKey
+            );
+
+          if (!active) return;
+
+          setGraphData(data);
+
+        } catch (error) {
+
+          console.error(error);
+
+        } finally {
+
+          if (active) {
+            setLoading(false);
+          }
+
+        }
+      };
+
+    loadGraph();
+
+    const interval = window.setInterval(loadGraph, 45_000);
 
     return () => {
-      svg.removeEventListener(
-        "wheel",
-        handleWheel
-      );
+      active = false;
+      window.clearInterval(interval);
     };
-  }, [handleWheel]);
+
+  }, [publicKey, connected]);
 
   /* =====================================
-     PAN
+     NODE DETAILS
   ===================================== */
 
-  const handleMouseDown =
+  const handleNodeClick =
     useCallback(
-      (e: React.MouseEvent) => {
-        if (e.button !== 0) return;
+      async (
+        node: GraphNode
+      ) => {
 
-        isPanning.current = true;
-
-        panStart.current = {
-          x: e.clientX,
-          y: e.clientY,
-        };
-
-        viewBoxStart.current = {
-          ...viewBox,
-        };
-      },
-      [viewBox]
-    );
-
-  const handleMouseMove =
-    useCallback(
-      (e: React.MouseEvent) => {
         if (
-          !isPanning.current ||
-          !svgRef.current
-        )
+          !publicKey ||
+          node.id ===
+          publicKey.toBase58()
+        ) {
           return;
+        }
 
-        const rect =
-          svgRef.current.getBoundingClientRect();
+        try {
 
-        const dx =
-          ((e.clientX -
-            panStart.current.x) /
-            rect.width) *
-          viewBoxStart.current.w;
+          setDetailLoading(
+            true
+          );
 
-        const dy =
-          ((e.clientY -
-            panStart.current.y) /
-            rect.height) *
-          viewBoxStart.current.h;
+          setSelectedNode(
+            null
+          );
 
-        setViewBox({
-          x:
-            viewBoxStart.current.x -
-            dx,
+          const detail =
+            await getInteractionDetail(
+              node.id,
+              publicKey
+            );
 
-          y:
-            viewBoxStart.current.y -
-            dy,
+          setSelectedNode(
+            detail
+          );
 
-          w:
-            viewBoxStart.current.w,
+        } catch (error) {
 
-          h:
-            viewBoxStart.current.h,
-        });
+          console.error(error);
+
+        } finally {
+
+          setDetailLoading(
+            false
+          );
+
+        }
       },
-      []
+      [publicKey]
     );
-
-  const handleMouseUp =
-    useCallback(() => {
-      isPanning.current = false;
-    }, []);
 
   /* =====================================
      TOOLTIP
@@ -316,9 +218,13 @@ const WebGraph = () => {
         node: GraphNode,
         e: React.MouseEvent
       ) => {
+
         setHoveredNode(node);
 
-        if (containerRef.current) {
+        if (
+          containerRef.current
+        ) {
+
           const rect =
             containerRef.current.getBoundingClientRect();
 
@@ -344,110 +250,295 @@ const WebGraph = () => {
     }, []);
 
   /* =====================================
-     LOAD GRAPH
+     ZOOM
   ===================================== */
 
-  useEffect(() => {
-    if (!publicKey || !connected) {
-      setGraphData({
-        nodes: [],
-        links: [],
+  const zoomIn =
+    useCallback(() => {
+
+      setViewBox((prev) => {
+
+        const scale = 0.8;
+
+        const nw =
+          prev.w * scale;
+
+        return {
+          x:
+            prev.x +
+            (prev.w - nw) /
+              2,
+
+          y:
+            prev.y +
+            (prev.h - nw) /
+              2,
+
+          w: nw,
+          h: nw,
+        };
       });
 
-      return;
-    }
+    }, []);
 
-    let active = true;
+  const zoomOut =
+    useCallback(() => {
 
-    const loadGraph = () => {
-      setLoading(true);
+      setViewBox((prev) => {
 
-      getAddressInteractions(
-        publicKey
-      ).then((data) => {
-        if (!active) return;
+        const scale = 1.25;
 
-        setGraphData(data);
+        const nw =
+          Math.min(
+            prev.w * scale,
+            DEFAULT_VB.w * 3
+          );
 
-        setLoading(false);
+        return {
+          x:
+            prev.x +
+            (prev.w - nw) /
+              2,
+
+          y:
+            prev.y +
+            (prev.h - nw) /
+              2,
+
+          w: nw,
+          h: nw,
+        };
       });
-    };
 
-    loadGraph();
+    }, []);
 
-    const interval =
-      window.setInterval(
-        loadGraph,
-        45000
+  const resetZoom =
+    useCallback(() => {
+      setViewBox(
+        DEFAULT_VB
       );
-
-    return () => {
-      active = false;
-
-      window.clearInterval(
-        interval
-      );
-    };
-  }, [publicKey, connected]);
+    }, []);
 
   /* =====================================
-     NODE DETAILS
+     TRACKPAD ZOOM
   ===================================== */
 
-  const handleNodeClick =
+  const handleWheel =
     useCallback(
-      (node: GraphNode) => {
-        if (
-          node.id ===
-          publicKey?.toBase58()
-        )
-          return;
+      (e: WheelEvent) => {
 
-        if (!publicKey) return;
+        e.preventDefault();
 
-        setDetailLoading(true);
+        const svg =
+          svgRef.current;
 
-        setSelectedNode(null);
+        if (!svg) return;
 
-        getInteractionDetail(
-          node.id,
-          publicKey
-        ).then((detail) => {
-          setSelectedNode(detail);
+        const rect =
+          svg.getBoundingClientRect();
 
-          setDetailLoading(false);
+        const mx =
+          ((e.clientX -
+            rect.left) /
+            rect.width) *
+            viewBox.w +
+          viewBox.x;
+
+        const my =
+          ((e.clientY -
+            rect.top) /
+            rect.height) *
+            viewBox.h +
+          viewBox.y;
+
+        const scale =
+          e.deltaY > 0
+            ? 1.08
+            : 0.92;
+
+        const nw =
+          Math.max(
+            220,
+            Math.min(
+              viewBox.w *
+                scale,
+              DEFAULT_VB.w *
+                3
+            )
+          );
+
+        const nh = nw;
+
+        const nx =
+          mx -
+          ((mx -
+            viewBox.x) /
+            viewBox.w) *
+            nw;
+
+        const ny =
+          my -
+          ((my -
+            viewBox.y) /
+            viewBox.h) *
+            nh;
+
+        setViewBox({
+          x: nx,
+          y: ny,
+          w: nw,
+          h: nh,
         });
       },
-      [publicKey]
+      [viewBox]
     );
+
+  useEffect(() => {
+
+    const svg =
+      svgRef.current;
+
+    if (!svg) return;
+
+    svg.addEventListener(
+      "wheel",
+      handleWheel,
+      {
+        passive: false,
+      }
+    );
+
+    return () => {
+      svg.removeEventListener(
+        "wheel",
+        handleWheel
+      );
+    };
+
+  }, [handleWheel]);
+
+  /* =====================================
+     PAN
+  ===================================== */
+
+  const handleMouseDown =
+    useCallback(
+      (
+        e: React.MouseEvent
+      ) => {
+
+        if (e.button !== 0)
+          return;
+
+        isPanning.current =
+          true;
+
+        panStart.current = {
+          x: e.clientX,
+          y: e.clientY,
+        };
+
+        viewBoxStart.current =
+          {
+            ...viewBox,
+          };
+      },
+      [viewBox]
+    );
+
+  const handleMouseMove =
+    useCallback(
+      (
+        e: React.MouseEvent
+      ) => {
+
+        if (
+          !isPanning.current ||
+          !svgRef.current
+        ) {
+          return;
+        }
+
+        const rect =
+          svgRef.current.getBoundingClientRect();
+
+        const dx =
+          ((e.clientX -
+            panStart.current.x) /
+            rect.width) *
+          viewBoxStart.current.w;
+
+        const dy =
+          ((e.clientY -
+            panStart.current.y) /
+            rect.height) *
+          viewBoxStart.current.h;
+
+        setViewBox({
+          x:
+            viewBoxStart.current
+              .x - dx,
+
+          y:
+            viewBoxStart.current
+              .y - dy,
+
+          w:
+            viewBoxStart.current
+              .w,
+
+          h:
+            viewBoxStart.current
+              .h,
+        });
+      },
+      []
+    );
+
+  const handleMouseUp =
+    useCallback(() => {
+      isPanning.current =
+        false;
+    }, []);
 
   /* =====================================
      HELPERS
   ===================================== */
 
-  const nodeById = useMemo(
-    () =>
-      new Map(
-        graphData.nodes.map((node) => [
-          node.id,
-          node,
-        ])
-      ),
-    [graphData.nodes]
-  );
+  const nodeById =
+    useMemo(
+      () =>
+        new Map(
+          graphData.nodes.map(
+            (node) => [
+              node.id,
+              node,
+            ]
+          )
+        ),
+      [graphData.nodes]
+    );
 
   const getNode = (
-    value: string | GraphNode
+    value:
+      | string
+      | GraphNode
   ) => {
-    if (typeof value === "string") {
-      return nodeById.get(value);
+
+    if (
+      typeof value ===
+      "string"
+    ) {
+      return nodeById.get(
+        value
+      );
     }
 
     return value;
   };
 
   /* =====================================
-     NODES
+     NODE UI
   ===================================== */
 
   const renderNode = (
@@ -456,23 +547,26 @@ const WebGraph = () => {
 
     const radius =
       node.label === "You"
-        ? 34
+        ? 38
         : Math.max(
-            14,
+            16,
             Math.min(
-              25,
-              11 + node.val
+              28,
+              12 + (node.val || 0) * 1.2
             )
           );
 
     const color =
       node.label === "You"
         ? "#a855f7"
-        : node.category === "exchange"
+        : node.category ===
+          "exchange"
         ? "#f59e0b"
-        : node.type === "wallet"
+        : node.type ===
+          "wallet"
         ? "#22c55e"
-        : node.type === "program"
+        : node.type ===
+          "program"
         ? "#38bdf8"
         : "#f59e0b";
 
@@ -486,49 +580,56 @@ const WebGraph = () => {
       <g
         key={node.id}
         onClick={() =>
-          handleNodeClick(node)
+          handleNodeClick(
+            node
+          )
         }
         onMouseEnter={(e) =>
-          handleNodeHover(node, e)
+          handleNodeHover(
+            node,
+            e
+          )
         }
         onMouseMove={(e) =>
-          handleNodeHover(node, e)
+          handleNodeHover(
+            node,
+            e
+          )
         }
         onMouseLeave={
           handleNodeLeave
         }
-        className={
-          node.label === "You"
-            ? "mesh-node mesh-node-center"
-            : "mesh-node cursor-pointer"
-        }
+        className="mesh-node cursor-pointer transition-opacity hover:opacity-100"
+        style={{
+          opacity: node.label === "You" ? 1 : 0.85,
+        }}
       >
 
         <circle
           cx={x}
           cy={y}
-          r={radius + 22}
+          r={radius + 24}
           fill={color}
-          opacity="0.05"
+          opacity="0.08"
         />
 
         <circle
           className="mesh-node-ring"
           cx={x}
           cy={y}
-          r={radius + 10}
+          r={radius + 12}
           fill="none"
           stroke={color}
-          strokeOpacity="0.25"
-          strokeWidth="2"
+          strokeOpacity="0.35"
+          strokeWidth="2.5"
         />
 
         <circle
           cx={x}
           cy={y}
-          r={radius + 8}
+          r={radius + 6}
           fill={color}
-          opacity="0.12"
+          opacity="0.15"
         />
 
         <circle
@@ -536,30 +637,44 @@ const WebGraph = () => {
           cy={y}
           r={radius}
           fill={color}
-          opacity="0.95"
+          opacity="0.92"
         />
 
         <circle
-          cx={x - radius * 0.25}
-          cy={y - radius * 0.25}
-          r={radius * 0.35}
+          cx={
+            x -
+            radius * 0.28
+          }
+          cy={
+            y -
+            radius * 0.28
+          }
+          r={
+            radius * 0.4
+          }
           fill="#ffffff"
-          opacity="0.22"
+          opacity="0.25"
         />
 
         <circle
           cx={x}
           cy={y}
-          r={radius * 0.18}
+          r={
+            radius * 0.2
+          }
           fill="#ffffff"
-          opacity="0.7"
+          opacity="0.75"
         />
 
         <text
           x={x}
-          y={y + radius + 22}
+          y={
+            y +
+            radius +
+            26
+          }
           textAnchor="middle"
-          className="fill-gray-200 text-[12px] font-medium select-none"
+          className="fill-gray-100 text-[13px] font-semibold select-none pointer-events-none"
         >
           {node.label}
         </text>
@@ -568,53 +683,31 @@ const WebGraph = () => {
     );
   };
 
-  if (!connected) {
+  if (!connected || !publicKey) {
     return (
-      <div className="dashboard-shell">
-
-        <div className="reclaim-hero">
-
-          <div className="reclaim-glow-card">
-
-            <Users
-              size={60}
-              className="text-cyan-300 mx-auto"
-            />
-
-            <h1 className="text-5xl font-black text-white mt-8">
-              Address Web
-            </h1>
-
-            <p className="text-slate-400 mt-5 text-xl">
-              Connect your wallet to
-              visualize wallet
-              interactions
-            </p>
-
-          </div>
-
-        </div>
-
+      <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
+        <Users size={48} className="text-gray-600" />
+        <p className="text-gray-400">Connect your wallet to view address interactions</p>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-shell">
+    <div className="dashboard-shell web-shell">
 
-      <div className="mb-5">
+      <div className="mb-3">
 
-        <p className="text-slate-400">
-          Visualize - Select the mesh to interact with it
+        <p className="text-slate-400 text-xs">
+          Wallet interaction mesh
         </p>
 
       </div>
 
       <div
-        className={`grid gap-4 ${
+        className={`grid gap-2 ${
           selectedNode ||
           detailLoading
-            ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px]"
+            ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_280px]"
             : "grid-cols-1"
         }`}
       >
@@ -623,7 +716,7 @@ const WebGraph = () => {
 
         <div
           ref={containerRef}
-          className="mesh-web-panel relative overflow-hidden rounded-3xl border border-cyan-500/10 bg-gray-900/50"
+          className="mesh-web-panel relative overflow-hidden rounded-2xl border border-cyan-500/10 bg-gray-900/50"
           onMouseLeave={
             handleMouseUp
           }
@@ -635,14 +728,16 @@ const WebGraph = () => {
           />
 
           {loading ? (
-            <div className="relative z-[1] flex items-center justify-center h-[72vh] min-h-[520px] max-h-[760px]">
+            <div className="relative z-[1] flex items-center justify-center h-[50vh] min-h-[320px] max-h-[480px]">
 
-              <div className="animate-spin rounded-full h-12 w-12 border-2 border-cyan-400 border-t-transparent" />
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-cyan-400 border-t-transparent" />
 
             </div>
           ) : (
             <>
-              <div className="absolute left-5 top-5 z-10 flex flex-wrap gap-2 text-xs">
+              {/* LEGEND */}
+
+              <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1 text-[10px]">
 
                 <span className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-amber-300">
                   Exchanges
@@ -663,7 +758,7 @@ const WebGraph = () => {
               <svg
                 ref={svgRef}
                 viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-                className="relative z-[1] h-[72vh] min-h-[520px] max-h-[760px] w-full select-none"
+                className="mesh-web-svg relative z-[1] h-[62vh] min-h-[320px] max-h-[680px] w-full select-none"
                 role="img"
                 onMouseDown={
                   handleMouseDown
@@ -676,56 +771,14 @@ const WebGraph = () => {
                 }
               >
 
-                {/* RINGS */}
-
-                <g className="mesh-rings">
-
-                  <circle
-                    cx="500"
-                    cy="500"
-                    r="160"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeDasharray="4 10"
-                    opacity="0.24"
-                  />
-
-                  <circle
-                    cx="500"
-                    cy="500"
-                    r="270"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeDasharray="4 10"
-                    opacity="0.22"
-                  />
-
-                  <circle
-                    cx="500"
-                    cy="500"
-                    r="380"
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeDasharray="4 10"
-                    opacity="0.18"
-                  />
-
-                  <circle
-                    cx="500"
-                    cy="500"
-                    r="470"
-                    fill="none"
-                    stroke="#a855f7"
-                    strokeDasharray="4 10"
-                    opacity="0.12"
-                  />
-
-                </g>
-
                 {/* LINKS */}
 
                 {graphData.links.map(
-                  (link, index) => {
+                  (
+                    link,
+                    index
+                  ) => {
+
                     const source =
                       getNode(
                         link.source as
@@ -743,46 +796,39 @@ const WebGraph = () => {
                     if (
                       !source ||
                       !target
-                    )
+                    ) {
                       return null;
+                    }
+
+                    const opacity = Math.max(0.15, Math.min(0.45, (link.value || 1) * 0.1));
 
                     return (
                       <line
-                        key={`${String(
-                          link.source
-                        )}-${String(
-                          link.target
-                        )}-${index}`}
+                        key={`${index}`}
                         className="mesh-link"
                         x1={
                           500 +
-                          (source.x || 0)
+                          (source.x ||
+                            0)
                         }
                         y1={
                           500 +
-                          (source.y || 0)
+                          (source.y ||
+                            0)
                         }
                         x2={
                           500 +
-                          (target.x || 0)
+                          (target.x ||
+                            0)
                         }
                         y2={
                           500 +
-                          (target.y || 0)
+                          (target.y ||
+                            0)
                         }
-                        stroke="#94a3b8"
-                        strokeOpacity={Math.min(
-                          0.68,
-                          0.22 +
-                            link.value *
-                              0.05
-                        )}
-                        strokeWidth={Math.min(
-                          4,
-                          1 +
-                            link.value *
-                              0.2
-                        )}
+                        stroke="#64748b"
+                        strokeOpacity={opacity}
+                        strokeWidth="2"
                       />
                     );
                   }
@@ -815,12 +861,12 @@ const WebGraph = () => {
                 </button>
 
                 <button
-                  onClick={resetZoom}
+                  onClick={
+                    resetZoom
+                  }
                   className="mesh-control-button"
                 >
-                  <Maximize
-                    size={16}
-                  />
+                  <Maximize size={16} />
                 </button>
 
               </div>
@@ -848,7 +894,9 @@ const WebGraph = () => {
 
                   <p className="text-gray-400 font-mono text-[10px] truncate mt-1">
 
-                    {hoveredNode.id}
+                    {
+                      hoveredNode.id
+                    }
 
                   </p>
 
@@ -860,11 +908,11 @@ const WebGraph = () => {
 
         </div>
 
-        {/* DETAILS PANEL */}
+        {/* DETAILS */}
 
         {(selectedNode ||
           detailLoading) && (
-          <div className="rounded-3xl border border-cyan-500/10 bg-gray-900/50 backdrop-blur-xl p-4 overflow-y-auto h-fit max-h-[72vh]">
+          <div className="rounded-3xl border border-cyan-500/10 bg-gray-900/50 backdrop-blur-xl p-4 overflow-y-auto h-fit max-h-[62vh]">
 
             {detailLoading ? (
               <div className="space-y-4 animate-pulse">
@@ -879,8 +927,6 @@ const WebGraph = () => {
             ) : (
               selectedNode && (
                 <>
-                  {/* HEADER */}
-
                   <div className="flex items-center justify-between mb-5">
 
                     <h2 className="text-white font-semibold text-lg">
@@ -899,8 +945,6 @@ const WebGraph = () => {
                     </button>
 
                   </div>
-
-                  {/* CONTENT */}
 
                   <div className="space-y-4">
 
@@ -938,9 +982,7 @@ const WebGraph = () => {
                           }
                           className="mesh-copy-button"
                         >
-
                           <Copy size={12} />
-
                         </button>
 
                       </div>
@@ -989,7 +1031,8 @@ const WebGraph = () => {
                     <div className="mesh-detail-card">
 
                       <p className="mesh-detail-label">
-                        Total SOL Transferred
+                        Total SOL
+                        Transferred
                       </p>
 
                       <p className="text-2xl font-bold text-cyan-300 mt-2">
@@ -1013,7 +1056,8 @@ const WebGraph = () => {
                       <ExternalLink size={14} />
 
                       <span>
-                        Open In Solscan
+                        Open In
+                        Solscan
                       </span>
 
                     </a>
@@ -1027,7 +1071,8 @@ const WebGraph = () => {
                         <div className="flex items-center justify-between mb-3">
 
                           <h3 className="text-white font-semibold">
-                            Recent Transactions
+                            Recent
+                            Transactions
                           </h3>
 
                           <span className="text-xs text-slate-500">
@@ -1043,7 +1088,10 @@ const WebGraph = () => {
                         <div className="space-y-3">
 
                           {selectedNode.transactions
-                            .slice(0, 6)
+                            .slice(
+                              0,
+                              6
+                            )
                             .map(
                               (
                                 tx,
@@ -1060,11 +1108,7 @@ const WebGraph = () => {
 
                                     <div className="mesh-tx-icon">
 
-                                      <ArrowRightLeft
-                                        size={
-                                          14
-                                        }
-                                      />
+                                      <ArrowRightLeft size={14} />
 
                                     </div>
 
@@ -1121,4 +1165,5 @@ const WebGraph = () => {
     </div>
   );
 };
+
 export default WebGraph;

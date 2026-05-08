@@ -61,74 +61,74 @@ const CoinDetail = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="coin-shell max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-2">
       <Link
         to="/"
-        className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-gray-400 hover:text-white mb-3 transition-colors text-xs"
       >
-        <ArrowLeft size={16} />
-        Back to Dashboard
+        <ArrowLeft size={14} />
+        Back
       </Link>
 
-      <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 mb-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+        <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-2.5 mb-3">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
             {token.logo ? (
               <img src={token.logo} alt="" className="h-full w-full rounded-full object-cover" />
             ) : (
               token.symbol.slice(0, 2)
             )}
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">{token.name}</h1>
-            <p className="text-gray-400">{token.symbol}</p>
+          <div className="flex-1">
+            <h1 className="text-sm font-bold text-white">{token.name}</h1>
+            <p className="text-gray-400 text-xs">{token.symbol}</p>
           </div>
-          <div className="ml-auto text-right">
-            <p className="text-2xl font-bold text-white">
+          <div className="text-right ml-auto">
+            <p className="text-sm font-bold text-white">
               ${token.price.toFixed(4)}
             </p>
             <div
-              className={`flex items-center gap-1 justify-end text-sm font-medium ${
+              className={`flex items-center gap-0.5 justify-end text-xs font-medium ${
                 token.priceChange24h >= 0 ? "text-green-400" : "text-red-400"
               }`}
             >
               {token.priceChange24h >= 0 ? (
-                <TrendingUp size={14} />
+                <TrendingUp size={12} />
               ) : (
-                <TrendingDown size={14} />
+                <TrendingDown size={12} />
               )}
               {Math.abs(token.priceChange24h).toFixed(2)}%
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gray-800/50 rounded-xl p-4">
-            <p className="text-gray-400 text-sm mb-1">Balance</p>
-            <p className="text-white font-semibold">
-              {token.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="bg-gray-800/50 rounded-lg p-2">
+            <p className="text-gray-400 text-[9px] mb-0.5">Balance</p>
+            <p className="text-white font-semibold text-xs">
+              {token.balance.toLocaleString(undefined, { maximumFractionDigits: 3 })}
             </p>
           </div>
-          <div className="bg-gray-800/50 rounded-xl p-4">
-            <p className="text-gray-400 text-sm mb-1">Value</p>
-            <p className="text-white font-semibold">${token.usdValue.toFixed(2)}</p>
+          <div className="bg-gray-800/50 rounded-lg p-2">
+            <p className="text-gray-400 text-[9px] mb-0.5">Value</p>
+            <p className="text-white font-semibold text-xs">${token.usdValue.toFixed(2)}</p>
           </div>
-          <div className="bg-gray-800/50 rounded-xl p-4">
-            <p className="text-gray-400 text-sm mb-1">Decimals</p>
-            <p className="text-white font-semibold">{token.decimals}</p>
+          <div className="bg-gray-800/50 rounded-lg p-2">
+            <p className="text-gray-400 text-[9px] mb-0.5">Decimals</p>
+            <p className="text-white font-semibold text-xs">{token.decimals}</p>
           </div>
-          <div className="bg-gray-800/50 rounded-xl p-4">
-            <p className="text-gray-400 text-sm mb-1">Mint Address</p>
-            <p className="text-white font-semibold text-xs truncate">
-              {token.mint}
+          <div className="bg-gray-800/50 rounded-lg p-2">
+            <p className="text-gray-400 text-[9px] mb-0.5">Mint</p>
+            <p className="text-white font-semibold text-[10px] truncate">
+              {token.mint.slice(0, 4)}...{token.mint.slice(-4)}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Price History</h2>
-        <div className="h-72">
+      <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-2 mb-3">
+        <h2 className="text-xs font-semibold text-white mb-1">Price History</h2>
+        <div className="h-32">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={token.priceHistory}>
               <defs>
@@ -139,19 +139,20 @@ const CoinDetail = () => {
               </defs>
               <XAxis
                 dataKey="time"
-                tick={{ fill: "#9ca3af", fontSize: 12 }}
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
                 axisLine={{ stroke: "#374151" }}
               />
               <YAxis
-                tick={{ fill: "#9ca3af", fontSize: 12 }}
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
                 axisLine={{ stroke: "#374151" }}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#1f2937",
                   border: "1px solid #374151",
-                  borderRadius: "12px",
+                  borderRadius: "8px",
                   color: "#fff",
+                  fontSize: "11px",
                 }}
               />
               <Area
@@ -159,27 +160,27 @@ const CoinDetail = () => {
                 dataKey="price"
                 stroke="#8b5cf6"
                 fill="url(#priceGradient)"
-                strokeWidth={2}
+                strokeWidth={1.5}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Recent Transactions</h2>
+      <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-2">
+        <h2 className="text-xs font-semibold text-white mb-2">Transactions</h2>
         {token.transactions.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No matching token transactions found</p>
+          <p className="text-gray-500 text-center py-4 text-xs">No transactions</p>
         ) : (
-          <div className="space-y-3">
-            {token.transactions.map((tx, i) => (
+          <div className="space-y-1">
+            {token.transactions.slice(0, 6).map((tx, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between bg-gray-800/30 rounded-xl p-4 hover:bg-gray-800/50 transition-colors"
+                className="flex flex-wrap items-center justify-between gap-2 bg-gray-800/30 rounded-lg p-2 hover:bg-gray-800/50 transition-colors"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                    className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold ${
                       tx.type === "buy"
                         ? "bg-green-600/20 text-green-400"
                         : tx.type === "sell"
@@ -190,10 +191,10 @@ const CoinDetail = () => {
                     {tx.type === "buy" ? "B" : tx.type === "sell" ? "S" : "T"}
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium capitalize">
+                    <p className="text-white text-xs font-medium capitalize">
                       {tx.type}
                     </p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-gray-500 text-[10px]">
                       {new Date(tx.timestamp * 1000).toLocaleDateString()}
                     </p>
                   </div>
@@ -208,7 +209,7 @@ const CoinDetail = () => {
                   href={`https://solscan.io/tx/${tx.signature}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-4 text-gray-500 hover:text-purple-400 transition-colors"
+                  className="ml-auto text-gray-500 hover:text-purple-400 transition-colors"
                 >
                   <ExternalLink size={14} />
                 </a>

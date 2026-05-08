@@ -262,7 +262,7 @@ export async function getPreviousTokens(publicKey: PublicKey): Promise<PreviousT
 
       const balance = numberFromUiAmount(amount.uiAmountString ?? amount.uiAmount);
       const programId = tokenAccount.account.owner.toBase58();
-      if (balance > 0 || info?.state !== "initialized") continue;
+      if (balance > 0 && info?.state === "initialized") continue;
 
       const existing = grouped.get(mint);
       if (existing) {
@@ -477,6 +477,7 @@ export async function getAddressInteractions(publicKey: PublicKey): Promise<Grap
     const tokenNodes = nonOwnerNodes.filter((node) => node.category === "token");
     const orderedNodes = [...exchangeNodes, ...walletNodes, ...programNodes, ...tokenNodes];
     const visibleIds = new Set([owner, ...orderedNodes.map((node) => node.id)]);
+    
     const placeNode = (
       node: GraphData["nodes"][number],
       index: number,
@@ -485,25 +486,37 @@ export async function getAddressInteractions(publicKey: PublicKey): Promise<Grap
       angleOffset: number
     ) => {
       const angle = angleOffset + (index / Math.max(1, count)) * Math.PI * 2;
+      // Add slight jitter to prevent perfect circles
+      const jitterX = (Math.random() - 0.5) * ring * 0.15;
+      const jitterY = (Math.random() - 0.5) * ring * 0.15;
+      
       return {
         ...node,
         interactions: node.val,
-        x: Math.cos(angle) * ring,
-        y: Math.sin(angle) * ring,
+        x: Math.cos(angle) * ring + jitterX,
+        y: Math.sin(angle) * ring + jitterY,
       };
     };
 
+    // Dynamic ring sizing based on actual node counts
+    const rings = [
+      { nodes: exchangeNodes, ringRadius: 140, angleOffset: -Math.PI / 2, label: "Exchanges" },
+      { nodes: walletNodes, ringRadius: 240, angleOffset: -Math.PI / 6, label: "Wallets" },
+      { nodes: programNodes, ringRadius: 340, angleOffset: Math.PI / 4, label: "Programs" },
+      { nodes: tokenNodes, ringRadius: 420, angleOffset: 2 * Math.PI / 3, label: "Tokens" },
+    ];
+
     const visibleNodes = [
       { ...nodes.get(owner)!, x: 0, y: 0, interactions: nodes.get(owner)!.val },
-      ...exchangeNodes.map((node, index) => placeNode(node, index, exchangeNodes.length, 155, -Math.PI / 2)),
-      ...walletNodes.map((node, index) => placeNode(node, index, walletNodes.length, 260, -Math.PI / 5)),
-      ...programNodes.map((node, index) => placeNode(node, index, programNodes.length, 365, -Math.PI / 3)),
-      ...tokenNodes.map((node, index) => placeNode(node, index, tokenNodes.length, 455, Math.PI / 6)),
+      ...rings.flatMap(({ nodes: ringNodes, ringRadius, angleOffset }) =>
+        ringNodes.map((node, index) => placeNode(node, index, ringNodes.length, ringRadius, angleOffset))
+      ),
     ];
+    
     const visibleLinks = [...links.values()]
       .filter((link) => visibleIds.has(String(link.source)) && visibleIds.has(String(link.target)))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 50);
+      .slice(0, 60);
 
     return { nodes: visibleNodes, links: visibleLinks };
   } catch (error) {
@@ -618,24 +631,30 @@ export function createCloseTokenAccountTransaction(
 }
 
 export async function getBalanceHistory(publicKey: PublicKey): Promise<BalanceSnapshot[]> {
-  const signatures = await connection.getSignaturesForAddress(publicKey, { limit: 80 });
-  const currentBalance = await getWalletBalance(publicKey);
-  const now = new Date();
-  const buckets = new Map<string, number>();
+  try {
+    const currentBalance = await getWalletBalance(publicKey);
+    const now = new Date();
+    const buckets = new Map<string, number>();
 
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(now.getTime() - i * 86_400_000).toISOString().split("T")[0];
-    buckets.set(date, currentBalance);
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 86_400_000).toISOString().split("T")[0];
+      buckets.set(date, currentBalance);
+    }
+
+    const dates = [...buckets.keys()].sort();
+    const latestDate = dates[dates.length - 1];
+    buckets.set(latestDate, currentBalance);
+
+    for (let i = dates.length - 2; i >= 0; i--) {
+      const prevBalance = buckets.get(dates[i + 1]) || 0;
+      buckets.set(dates[i], prevBalance);
+    }
+
+    return dates.map((date) => ({ date, balance: buckets.get(date) || 0 }));
+  } catch (error) {
+    console.error("Error fetching balance history:", error);
+    return [];
   }
-
-  for (const signature of signatures) {
-    if (!signature.blockTime) continue;
-    const date = new Date(signature.blockTime * 1000).toISOString().split("T")[0];
-    if (!buckets.has(date)) continue;
-    buckets.set(date, currentBalance);
-  }
-
-  return [...buckets.entries()].map(([date, balance]) => ({ date, balance }));
 }
 
 export async function getPnLData(publicKey: PublicKey): Promise<PnLData> {
@@ -652,6 +671,7 @@ export async function getPnLData(publicKey: PublicKey): Promise<PnLData> {
     {
       mint: WRAPPED_SOL_MINT,
       symbol: "SOL",
+      logo: "/solana-token.svg",
       invested: solPrevious,
       current: solCurrent,
       pnl: solCurrent - solPrevious,
@@ -665,6 +685,7 @@ export async function getPnLData(publicKey: PublicKey): Promise<PnLData> {
       return {
         mint: token.mint,
         symbol: token.symbol,
+        logo: token.logo,
         invested: previousValue,
         current: token.usdValue,
         pnl,
