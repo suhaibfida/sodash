@@ -6,7 +6,6 @@ AI-powered Solana wallet dashboard that visualizes token portfolios, transaction
 <img width="1344" height="595" alt="image" src="https://github.com/user-attachments/assets/30b615c9-e263-4e92-be30-ab823d9e6a57" />
 <img width="298" height="548" alt="image" src="https://github.com/user-attachments/assets/9047dd30-c5eb-4e5e-90d7-13093a46bec4" />
 <img width="293" height="472" alt="image" src="https://github.com/user-attachments/assets/e40e852c-f12e-46d1-b245-95595a34fc43" />
-<img width="293" height="472" alt="image" src="https://github.com/user-attachments/assets/7a9c47d8-453f-4f1f-a630-64921a96568e" />
 <img width="1343" height="603" alt="image" src="https://github.com/user-attachments/assets/520d43c0-c767-4edf-838d-de258dfffa08" />
 
 
