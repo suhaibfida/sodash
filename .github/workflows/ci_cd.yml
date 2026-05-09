@@ -24,7 +24,7 @@ jobs:
 
       # Step 4 — Generate Prisma client
       - name: Generate Prisma client
-        run: cd api && bun exec prisma generate
+        run: cd api && bunx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
