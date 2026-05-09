@@ -1,5 +1,3 @@
-# sodash
-An AI-powered Solana wallet dashboard that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
 
 # Sodash — AI-Powered Wallet Monitoring System that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
 
