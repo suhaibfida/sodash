@@ -18,26 +18,44 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
-      # Step 3 — Install dependencies
-      - name: Install dependencies
+      # Step 3 — Install root dependencies
+      - name: Install root dependencies
         run: bun install
 
-      # Step 4 — Generate Prisma client
+      # Step 4 — Install API dependencies
+      - name: Install API dependencies
+        run: |
+          cd api
+          bun install
+
+      # Step 5 — Install Client dependencies
+      - name: Install Client dependencies
+        run: |
+          cd client
+          bun install
+
+      # Step 6 — Generate Prisma client
       - name: Generate Prisma client
-        run: cd api && bunx prisma generate
+        run: |
+          cd api
+          bunx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      # Step 5 — Lint code
-      - name: Lint code
-        run: cd client && bun run lint
+      # Step 7 — Lint client
+      - name: Lint client
+        run: |
+          cd client
+          bun run lint
         continue-on-error: true
 
-      # Step 6 — Build client
+      # Step 8 — Build client
       - name: Build client
-        run: cd client && bun run build
+        run: |
+          cd client
+          bun run build
 
-      # Step 7 — Deploy to EC2
+      # Step 9 — Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -46,30 +64,42 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+
             cd ~/sodash
+
+            # Pull latest code
             git fetch origin
             git reset --hard origin/main
-            
-            # Install Bun if not already installed
+
+            # Install Bun
             curl -fsSL https://bun.sh/install | bash
+
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
-            
-            # Install dependencies
+
+            source ~/.bashrc || true
+
+            # Environment variables
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            export DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            export TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+
+            # Install root dependencies
             bun install
-            
-            # Generate Prisma client
-            cd api && bun exec prisma generate && cd ..
-            
-            # Build client
-            cd client && bun run build && cd ..
-            
-            # Set environment variables
-            export JWT_SECRET=${{ secrets.JWT_SECRET }}
-            export DATABASE_URL=${{ secrets.DATABASE_URL }}
-            export TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            
-            # Start/restart API with PM2
-            pm2 startOrReload ecosystem.config.js
+
+            # API setup
+            cd api
+            bun install
+            bunx prisma generate
+            cd ..
+
+            # Client setup
+            cd client
+            bun install
+            bun run build
+            cd ..
+
+            # Restart PM2
+            pm2 startOrReload ecosystem.config.js --update-env
             pm2 save
             pm2 list
