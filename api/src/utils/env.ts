@@ -35,7 +35,9 @@ function getEnvOptionalInt(key: string, fallback: number): number {
 
 function getEnvOptionalFloat(key: string, fallback: number): number {
   const value = process.env[key];
-  return value ? parseFloat(value) : fallback;
+  if (!value) return fallback;
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function getEnvOptionalBool(key: string, fallback: boolean): boolean {

@@ -20,7 +20,7 @@ export function TelegramOTPModal({
   isOpen,
   onClose,
   walletAddress,
-  onSuccess,
+  onSuccess: _onSuccess,
 }: TelegramOTPModalProps) {
   const [step, setStep] = useState<"init" | "waiting">("init");
   const [otpCode, setOtpCode] = useState("");
@@ -142,7 +142,9 @@ export function TelegramOTPModal({
                   <p className="text-3xl font-mono font-bold text-white tracking-wider">
                     {otpCode}
                   </p>
-                  <p className="text-gray-500 text-xs mt-2">Expires in 10 minutes</p>
+                  <p className="text-gray-500 text-xs mt-2">
+                    Expires in 10 minutes
+                  </p>
                 </div>
 
                 <div className="space-y-3">
