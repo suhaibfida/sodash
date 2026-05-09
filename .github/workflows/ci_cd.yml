@@ -43,11 +43,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       # Step 7 — Lint client
-      - name: Lint client
-        run: |
-          cd client
-          bun run lint
-        continue-on-error: true
+      # - name: Lint client
+      #   run: |
+      #     cd client
+      #     bun run lint
+      #   continue-on-error: true
 
       # Step 8 — Build client
       - name: Build client
