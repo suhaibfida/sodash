@@ -1,24 +1,37 @@
-# Sodash — AI-Powered Wallet Monitoring System
+# sodash
+AI-powered Solana wallet dashboard that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
+<img width="14203" height="7147" alt="exc" src="https://github.com/user-attachments/assets/0b915f83-c2c2-4805-853f-e0e0ff7266c7" />
+<img width="1575" height="694" alt="image" src="https://github.com/user-attachments/assets/945b6b75-3265-4a54-b40b-fc73ffa8a2f0" />
 
-Sodash is a **production-ready** AI-powered Solana wallet monitoring system that delivers real-time portfolio alerts and AI-generated daily summaries via Telegram.
+
+#  Installation & Setup
+
+## 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+```
 
 ---
 
-## 📚 Complete Documentation
+## 2️⃣ Install dependencies
 
-All setup, configuration, architecture, and troubleshooting information is available in **[DOCUMENTATION.md](./DOCUMENTATION.md)**
+### Install all dependencies (root + apps)
 
-### Quick Links:
-- **[Quick Start (15 min)](./DOCUMENTATION.md#quick-start-15-min)** — Get running immediately
-- **[Prerequisites](./DOCUMENTATION.md#prerequisites)** — Required software
-- **[Database Setup](./DOCUMENTATION.md#-database-setup)** — PostgreSQL configuration
-- **[Telegram Bot Setup](./DOCUMENTATION.md#-telegram-bot-configuration)** — Create and configure bot
-- **[Environment Variables](./DOCUMENTATION.md#-environment-variables)** — All configuration options
-- **[Installation](./DOCUMENTATION.md#-installation--running)** — Full setup guide
-- **[System Architecture](./DOCUMENTATION.md#-system-architecture)** — How it works
-- **[Testing & Verification](./DOCUMENTATION.md#-testing--verification)** — Test procedures
-- **[Troubleshooting](./DOCUMENTATION.md#-troubleshooting)** — Common issues & fixes
-- **[API Endpoints](./DOCUMENTATION.md#-api-endpoints)** — API reference
+```bash
+bun install
+```
+
+Or if separate:
+
+```bash
+cd client
+bun install
+
+cd api
+bun install
+```
 
 ---
 
