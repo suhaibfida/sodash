@@ -1,10 +1,7 @@
 # sodash
 AI-powered Solana wallet dashboard that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
 <<<<<<< HEAD
-# Sodash — AI-Powered Wallet Monitoring System
-=======
-# sodash
-AI-powered Solana wallet dashboard that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
+# Sodash — AI-Powered Wallet Monitoring System that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
 
 <img width="14203" height="7147" alt="page" src="https://github.com/user-attachments/assets/34bab93f-6780-4eaf-ae77-1597fa48016d" />
 <img width="1335" height="587" alt="image" src="https://github.com/user-attachments/assets/475df9ad-5eaa-4799-8253-e2df9b1088a8" />
@@ -13,14 +10,6 @@ AI-powered Solana wallet dashboard that visualizes token portfolios, transaction
 <img width="1344" height="595" alt="image" src="https://github.com/user-attachments/assets/30b615c9-e263-4e92-be30-ab823d9e6a57" />
 <img width="538" height="499" alt="image" src="https://github.com/user-attachments/assets/c15dcfd5-3d68-4e1c-b1d0-16a5e568a257" />
 <img width="1343" height="603" alt="image" src="https://github.com/user-attachments/assets/520d43c0-c767-4edf-838d-de258dfffa08" />
-
-
-
-
-
-
-
->>>>>>> d654c626f1d3f833a311c5aaa68c54b50a4388a1
 
 #  Installation & Setup
 
@@ -74,7 +63,6 @@ bun install
 
 ## ⚠️ Important
 
-- Never commit `.env` files
 - Requires PostgreSQL v14+
 - Requires Bun v1.0+
 - See [DOCUMENTATION.md](./DOCUMENTATION.md) for all details
@@ -90,7 +78,6 @@ bun install
 - ✅ 4 background workers
 - ✅ OpenAI/Gemini AI integration
 - ✅ Complete documentation
-- ✅ Testing procedures
 
 ---
 
