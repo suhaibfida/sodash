@@ -1,62 +1,27 @@
-# Sodash — AI-Powered Wallet Monitoring System
-## Complete Implementation Guide
+# sodash
+AI-powered Solana wallet dashboard that visualizes token portfolios, transaction flows, and rent recovery insights with an intelligent assistant.
 
-Sodash is a **production-ready** AI-powered Solana wallet monitoring system that delivers real-time portfolio alerts and AI-generated daily summaries via Telegram.
 
-![Dashboard Preview](https://github.com/user-attachments/assets/0b915f83-c2c2-4805-853f-e0e0ff7266c7)
-![Dashboard Analytics](https://github.com/user-attachments/assets/945b6b75-3265-4a54-b40b-fc73ffa8a2f0)
+<img width="14203" height="7147" alt="page" src="https://github.com/user-attachments/assets/34bab93f-6780-4eaf-ae77-1597fa48016d" />
+<img width="1335" height="587" alt="image" src="https://github.com/user-attachments/assets/475df9ad-5eaa-4799-8253-e2df9b1088a8" />
+<img width="1349" height="601" alt="image" src="https://github.com/user-attachments/assets/a8562b69-8a66-4fc5-943e-35ff2801612e" />
+<img width="1335" height="594" alt="image" src="https://github.com/user-attachments/assets/dc06e737-9842-4ae2-842d-d56f932854fd" />
+<img width="1344" height="595" alt="image" src="https://github.com/user-attachments/assets/30b615c9-e263-4e92-be30-ab823d9e6a57" />
+<img width="538" height="499" alt="image" src="https://github.com/user-attachments/assets/c15dcfd5-3d68-4e1c-b1d0-16a5e568a257" />
+<img width="1343" height="603" alt="image" src="https://github.com/user-attachments/assets/520d43c0-c767-4edf-838d-de258dfffa08" />
 
----
 
-## 🎯 What's New: Telegram Integration & AI Summaries
 
-### ✨ New Features in v1.1
 
-✅ **Secure Telegram Verification** — OTP-based wallet linking with rate limiting
-✅ **Real-Time Portfolio Alerts** — Get notified when portfolio drops >10%
-✅ **AI-Powered Summaries** — Morning & evening recaps with AI insights
-✅ **Timezone Support** — Summaries delivered in your local time
-✅ **Background Workers** — Automatic monitoring every 5 minutes
-✅ **Production Ready** — Complete backend implementation
 
-### 📊 Existing Features (Preserved)
 
-✅ Wallet connect with Solana Adapter
-✅ Portfolio dashboard with analytics
-✅ Token balance tracking & PnL metrics
-✅ Token detail pages
-✅ Wallet interaction graph
-✅ Rent reclaim system
 
----
+>>>>>>> d654c626f1d3f833a311c5aaa68c54b50a4388a1
 
-## 🚀 Quick Start (15 min)
+#  Installation & Setup
 
-### Prerequisites
-```bash
-bun --version         # v1.0+
-psql --version        # v14+
-```
+## 1️⃣ Clone the repository
 
-### Step 1: Database
-```bash
-createdb sodash
-```
-
-### Step 2: Environment
-```bash
-cd api
-cp .env.example .env
-# Edit .env with your API keys (Telegram, OpenAI, Solana RPC)
-```
-
-### Step 3: Install & Run
-```bash
-bun install
-bun run dev
-```
-
-### Step 4: Test
 ```bash
 curl http://localhost:3000/health
 ```
@@ -354,124 +319,37 @@ bun run dev
 
 ---
 
-## 📞 Support
+## 🚀 Quick Start (60 seconds)
 
-### Quick Links
-- [PostgreSQL Docs](https://postgresql.org)
-- [Telegraf Docs](https://telegraf.js.org)
-- [Prisma Docs](https://prisma.io)
-- [OpenAI API](https://openai.com/api)
-- [Solana Docs](https://solana.com/docs)
-
-### Troubleshooting
-- Check server logs for errors
-- Verify `.env` variables are set
-- Ensure PostgreSQL is running: `psql -d sodash`
-- Test API: `curl http://localhost:3000/health`
-
-See [SETUP_GUIDE.md](./SETUP_GUIDE.md#troubleshooting) for detailed troubleshooting.
+1. **Open [DOCUMENTATION.md](./DOCUMENTATION.md#quick-start-15-min)**
+2. **Follow Quick Start section**
+3. **Get running in 15 minutes**
 
 ---
-
-## 🎓 Next Steps
-
-1. ✅ Read [QUICKSTART.md](./QUICKSTART.md)
-2. ✅ Start backend with `bun run dev`
-3. ✅ Test with curl or Postman
-4. ✅ Integrate React components
-5. ✅ Follow [TESTING_GUIDE.md](./TESTING_GUIDE.md)
-6. ✅ Deploy to production
-
----
-
-## 📄 Existing Docs
-
-The original dashboard features are documented in:
-- Portfolio dashboard
-- Token analytics
-- Graph visualization
-- Rent reclaim system
-
-All existing features are **fully preserved** and working.
-
----
-
-## 👥 Contributing
-
-Contributions welcome! Please:
-1. Follow TypeScript style
-2. Add tests for changes
-3. Update docs if needed
-4. Submit pull request
-
----
-
-## 📝 License
-
-[Your License Here]
-
----
-
-## ✨ Status
-
-**v1.1.0** — Production Ready
-
-- ✅ Backend complete
-- ✅ Frontend components complete
-- ✅ Documentation complete
-- ✅ Testing guide complete
-- ✅ Ready for production deployment
-
-**Start with [QUICKSTART.md](./QUICKSTART.md) in 15 minutes!** 🚀
-
-
-### Start backend
-
-```bash
-cd api
-bun run dev
-```
-
-### Start frontend
-
-```bash
-cd client
-bun run dev
-```
-
----
-
-## 5️⃣ Open in browser
-
-Frontend:
-
-```
-http://localhost:5173
-```
-
-Backend:
-
-```
-http://localhost:5000
-```
-
----
-
-
 
 ## ⚠️ Important
 
-* Never commit `.env` files
+- Never commit `.env` files
+- Requires PostgreSQL v14+
+- Requires Bun v1.0+
+- See [DOCUMENTATION.md](./DOCUMENTATION.md) for all details
 
 ---
 
-## 🛠️ Optional Scripts
+## 🎯 What's Included
 
-If you want to run both together (from root):
+- ✅ Express API backend
+- ✅ React frontend components
+- ✅ PostgreSQL database schema
+- ✅ Telegram bot integration
+- ✅ 4 background workers
+- ✅ OpenAI/Gemini AI integration
+- ✅ Complete documentation
+- ✅ Testing procedures
 
-```bash
-bun run dev
-```
+---
+
+**👉 [Start with DOCUMENTATION.md →](./DOCUMENTATION.md)**
 
 
 
