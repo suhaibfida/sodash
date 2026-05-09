@@ -28,11 +28,11 @@ jobs:
           cd api
           bun install
 
-      # Step 5 — Install Client dependencies
-      - name: Install Client dependencies
-        run: |
-          cd client
-          bun install
+      # # Step 5 — Install Client dependencies
+      # - name: Install Client dependencies
+      #   run: |
+      #     cd client
+      #     bun install
 
       # Step 6 — Generate Prisma client
       - name: Generate Prisma client
@@ -49,11 +49,11 @@ jobs:
       #     bun run lint
       #   continue-on-error: true
 
-      # Step 8 — Build client
-      - name: Build client
-        run: |
-          cd client
-          bun run build
+      # # Step 8 — Build client
+      # - name: Build client
+      #   run: |
+      #     cd client
+      #     bun run build
 
       # Step 9 — Deploy to EC2
       - name: Deploy to EC2
@@ -94,10 +94,10 @@ jobs:
             cd ..
 
             # Client setup
-            cd client
-            bun install
-            bun run build
-            cd ..
+            # cd client
+            # bun install
+            # bun run build
+            # cd ..
 
             # Restart PM2
             pm2 startOrReload ecosystem.config.js --update-env
