@@ -1,0 +1,229 @@
+// =============================================
+// Sodash — Prisma Schema
+// Database: PostgreSQL
+// ORM: Prisma
+// =============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================
+// ENUMS
+// =============================================
+
+enum AlertType {
+  DROP_10
+  DROP_15
+  DROP_20
+  DROP_CUSTOM
+}
+
+enum SummaryType {
+  MORNING
+  NIGHT
+}
+
+// =============================================
+// USER
+// Central record linked to a Solana wallet.
+// =============================================
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique @map("wallet_address")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  telegramConnection  TelegramConnection?
+  notificationSettings NotificationSettings?
+  walletSnapshots     WalletSnapshot[]
+  alertHistory        AlertHistory[]
+
+  @@map("users")
+  @@index([walletAddress])
+}
+
+// =============================================
+// TELEGRAM CONNECTION
+// One verified Telegram account per wallet.
+// =============================================
+
+model TelegramConnection {
+  id                   String    @id @default(cuid())
+  walletAddress        String    @unique @map("wallet_address")
+  telegramChatId       String    @unique @map("telegram_chat_id")
+  telegramUsername     String?   @map("telegram_username")
+  verified             Boolean   @default(false)
+  verifiedAt           DateTime? @map("verified_at")
+  notificationsEnabled Boolean   @default(true) @map("notifications_enabled")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relation
+  user User @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+
+  @@map("telegram_connections")
+  @@index([walletAddress])
+  @@index([telegramChatId])
+}
+
+// =============================================
+// VERIFICATION SESSION
+// Temporary OTP session for Telegram linking.
+// Standalone — not ORM-linked for security reasons
+// (session can exist before user record).
+// =============================================
+
+model VerificationSession {
+  id            String    @id @default(cuid())
+  walletAddress String    @map("wallet_address")
+  otpCode       String    @map("otp_code")
+  telegramChatId String?  @map("telegram_chat_id")
+  expiresAt     DateTime  @map("expires_at")
+  verified      Boolean   @default(false)
+  used          Boolean   @default(false)
+  attemptCount  Int       @default(0) @map("attempt_count")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("verification_sessions")
+  @@index([walletAddress])
+  @@index([expiresAt])
+}
+
+// =============================================
+// NOTIFICATION SETTINGS
+// Per-user timezone and scheduling config.
+// =============================================
+
+model NotificationSettings {
+  id               String    @id @default(cuid())
+  walletAddress    String    @unique @map("wallet_address")
+  timezone         String    @default("UTC")          // IANA format e.g. "Asia/Kolkata"
+  morningSummaryTime String  @default("08:00") @map("morning_summary_time") // HH:MM local time
+  nightSummaryTime   String  @default("21:00") @map("night_summary_time")   // HH:MM local time
+  morningSummaryEnabled Boolean @default(true) @map("morning_summary_enabled")
+  nightSummaryEnabled   Boolean @default(true) @map("night_summary_enabled")
+  alertThreshold   Float     @default(10.0) @map("alert_threshold") // Drop % to trigger alert
+  lastMorningSentAt DateTime? @map("last_morning_sent_at")
+  lastNightSentAt   DateTime? @map("last_night_sent_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relation
+  user User @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+
+  @@map("notification_settings")
+  @@index([walletAddress])
+}
+
+// =============================================
+// WALLET SNAPSHOT
+// Every-5-minute portfolio snapshot.
+// =============================================
+
+model WalletSnapshot {
+  id             String   @id @default(cuid())
+  walletAddress  String   @map("wallet_address")
+  portfolioValue Float    @map("portfolio_value")  // USD total
+  solBalance     Float    @map("sol_balance")
+  pnlPercent     Float    @map("pnl_percent")       // vs previous snapshot
+  pnlUsd         Float    @map("pnl_usd")
+  topTokensJson  String   @map("top_tokens_json")   // JSON string of top holdings
+  snapshotAt     DateTime @default(now()) @map("snapshot_at")
+
+  // Relation
+  user User @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+
+  @@map("wallet_snapshots")
+  @@index([walletAddress])
+  @@index([walletAddress, snapshotAt])
+  @@index([snapshotAt])
+}
+
+// =============================================
+// ALERT HISTORY
+// Tracks sent alerts to prevent duplicate spam.
+// =============================================
+
+model AlertHistory {
+  id            String    @id @default(cuid())
+  walletAddress String    @map("wallet_address")
+  alertType     AlertType @map("alert_type")
+  portfolioValue Float    @map("portfolio_value")
+  dropPercent   Float     @map("drop_percent")
+  messageText   String    @map("message_text")    // What was actually sent
+  sentAt        DateTime  @default(now()) @map("sent_at")
+
+  // Relation
+  user User @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+
+  @@map("alert_history")
+  @@index([walletAddress])
+  @@index([walletAddress, sentAt])
+}
+
+// =============================================
+// WALLET PROFILE
+// AI-powered wallet intelligence profile.
+// =============================================
+
+model WalletProfile {
+  id                String   @id @default(cuid())
+  walletAddress     String   @unique @map("wallet_address")
+  portfolioValue    Float    @default(0) @map("portfolio_value")
+  riskScore         Float    @default(0) @map("risk_score")  // 0-100
+  concentrationRisk String   @default("LOW") @map("concentration_risk")
+  reclaimableSol    Float    @default(0) @map("reclaimable_sol")
+  walletBehavior    String?  @map("wallet_behavior")  // JSON string
+  topHoldings       String?  @map("top_holdings")     // JSON string
+  interactionSummary String? @map("interaction_summary") // JSON string
+  lastAnalyzedAt    DateTime @default(now()) @map("last_analyzed_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("wallet_profiles")
+  @@index([walletAddress])
+}
+
+// =============================================
+// CHAT SESSION
+// Tracks AI chat conversations per wallet.
+// =============================================
+
+model ChatSession {
+  id            String   @id @default(cuid())
+  walletAddress String   @map("wallet_address")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  messages ChatMessage[]
+
+  @@map("chat_sessions")
+  @@index([walletAddress])
+  @@index([walletAddress, updatedAt])
+}
+
+// =============================================
+// CHAT MESSAGE
+// Individual messages in AI chat.
+// =============================================
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  role      String   // "user" | "assistant" | "system"
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+  @@index([sessionId])
+  @@index([sessionId, createdAt])
+}

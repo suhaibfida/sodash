@@ -17,10 +17,10 @@ const SolPriceModal = ({ price, onClose }: SolPriceModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-700">
+        <div className="flex justify-between items-center p-3 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Solana (SOL)</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X size={24} />
@@ -28,11 +28,18 @@ const SolPriceModal = ({ price, onClose }: SolPriceModalProps) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-1 space-y-1">
           {/* Token Header */}
           <div className="flex items-center gap-4 pb-4 border-b border-gray-700">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
-              ◎
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-200 to-indigo-100 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                 <img 
+              src="/solana-token.svg" 
+              alt="Solana" 
+              className="navbar-solana-icon"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Solana</h1>
@@ -41,7 +48,7 @@ const SolPriceModal = ({ price, onClose }: SolPriceModalProps) => {
           </div>
 
           {/* Price Information */}
-          <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-lg p-4">
+          <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-lg p-3">
             <p className="text-gray-400 text-sm mb-2">Current Price</p>
             <p className="text-3xl font-bold text-white">
               ${price !== null ? price.toFixed(2) : "Loading..."}
@@ -50,19 +57,19 @@ const SolPriceModal = ({ price, onClose }: SolPriceModalProps) => {
 
           {/* Token Details */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-800/50 rounded-lg p-3">
+            <div className="bg-gray-800/50 rounded-lg p-2">
               <p className="text-gray-400 text-xs mb-1">Network</p>
               <p className="text-white font-bold text-sm">Solana</p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-3">
+            <div className="bg-gray-800/50 rounded-lg p-2">
               <p className="text-gray-400 text-xs mb-1">Decimals</p>
               <p className="text-white font-bold text-sm">9</p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-3">
+            <div className="bg-gray-800/50 rounded-lg p-2">
               <p className="text-gray-400 text-xs mb-1">Type</p>
               <p className="text-white font-bold text-sm">Native</p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-3">
+            <div className="bg-gray-800/50 rounded-lg p-1">
               <p className="text-gray-400 text-xs mb-1">Status</p>
               <p className="text-green-400 font-bold text-sm">Active</p>
             </div>
@@ -112,15 +119,7 @@ const SolPriceModal = ({ price, onClose }: SolPriceModalProps) => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-700 p-4 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors"
-          >
-            Close
-          </button>
-        </div>
+      
       </div>
     </div>
   );

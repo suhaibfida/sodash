@@ -697,7 +697,7 @@ const WebGraph = () => {
 
       <div className="mb-3">
 
-        <p className="text-slate-400 text-xs">
+        <p className="text-slate-200 text-md px-3 py-1 rounded-lg bg-gray-800/50 border border-gray-700/50 inline-block">
           Wallet interaction mesh
         </p>
 
@@ -758,7 +758,7 @@ const WebGraph = () => {
               <svg
                 ref={svgRef}
                 viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-                className="mesh-web-svg relative z-[1] h-[62vh] min-h-[320px] max-h-[680px] w-full select-none"
+                className="mesh-web-svg relative z-[1] h-[72vh] min-h-[350px] max-h-[780px] w-full select-none"
                 role="img"
                 onMouseDown={
                   handleMouseDown

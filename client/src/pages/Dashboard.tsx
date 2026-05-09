@@ -249,11 +249,11 @@ const Dashboard = () => {
             <polygon points={`0,46 ${points} 100,46`} fill="url(#portfolioMiniFill)" />
           </svg>
           <div className="mini-chart-metrics">
-            <div className="text-right">
+            {/* <div className="text-right">
               <p className="text-gray-400 text-[10px]">SOL Balance</p>
               <p className="text-cyan-300 text-xs font-bold">{solBalance.toFixed(4)}</p>
               <p className="text-gray-500 text-[10px]">${(solBalance * solPrice).toFixed(2)}</p>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -476,9 +476,9 @@ const Dashboard = () => {
       )}
 
       {selectedPreviousToken && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full my-8">
-            <div className="flex justify-between items-center p-6 border-b border-gray-700">
+        <div className="fixed  inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-sm w-full">
+            <div className="flex justify-between items-center p-2 border-b border-gray-700">
               <h2 className="text-lg font-bold text-white">Token Details</h2>
               <button 
                 onClick={() => setSelectedPreviousToken(null)} 
@@ -487,9 +487,9 @@ const Dashboard = () => {
                 ✕
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3 pb-4 border-b border-gray-700">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+            <div className="p-3 space-y-2">
+              <div className="flex items-center gap-3 pb-1 border-b border-gray-700">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                   {selectedPreviousToken.logo ? (
                     <img src={selectedPreviousToken.logo} alt="" className="h-full w-full rounded-full object-cover" />
                   ) : (
@@ -497,45 +497,38 @@ const Dashboard = () => {
                   )}
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-white">{selectedPreviousToken.name}</h1>
+                  <h1 className="text-md font-bold text-white">{selectedPreviousToken.name}</h1>
                   <p className="text-gray-400 text-sm">{selectedPreviousToken.symbol}</p>
                 </div>
               </div>
               
-              <div className="space-y-3">
-                <div className="bg-gray-800/50 rounded-lg p-3">
+              <div className="space-y-2">
+                <div className="bg-gray-800/50 rounded-lg">
                   <p className="text-gray-400 text-xs mb-1">Network</p>
                   <p className="text-white font-bold">{selectedPreviousToken.program}</p>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-3">
-                  <p className="text-gray-400 text-xs mb-1">Decimals</p>
+                <div className="bg-gray-800/50 rounded-lg">
+                  <p className="text-gray-400 text-xs">Decimals</p>
                   <p className="text-white font-bold">{selectedPreviousToken.decimals}</p>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="bg-gray-800/50 rounded-lg">
                   <p className="text-gray-400 text-xs mb-1">Reclaimable SOL</p>
                   <p className="text-white font-bold">{(selectedPreviousToken.reclaimableLamports / 1e9).toFixed(5)} SOL</p>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-3">
-                  <p className="text-gray-400 text-xs mb-1">Token Accounts</p>
+                <div className="bg-gray-800/50 rounded-lg">
+                  <p className="text-gray-400 text-xs">Token Accounts</p>
                   <p className="text-white font-bold">{selectedPreviousToken.tokenAccounts.length}</p>
                 </div>
               </div>
 
               <div className="bg-gray-800/30 rounded-lg p-3 border border-gray-700">
-                <p className="text-gray-400 text-xs mb-2">Mint Address</p>
+                <p className="text-gray-400 text-xs mb-1">Mint Address</p>
                 <code className="text-xs text-gray-300 break-all font-mono">{selectedPreviousToken.mint}</code>
               </div>
 
               <p className="text-gray-400 text-xs">Source: {selectedPreviousToken.source}</p>
             </div>
-            <div className="border-t border-gray-700 p-4 flex justify-end">
-              <button
-                onClick={() => setSelectedPreviousToken(null)}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors"
-              >
-                Close
-              </button>
-            </div>
+            
           </div>
         </div>
       )}

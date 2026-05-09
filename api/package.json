@@ -8,13 +8,21 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/express": "^5.0.6"
+    "@types/express": "^5.0.6",
+    "prisma": "^7.8.0"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@solana/web3.js": "^1.98.4",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.1",
+    "node-cron": "^4.2.1",
+    "pg": "^8.20.0",
+    "telegraf": "^4.16.3",
     "zod": "^4.4.2"
   }
 }
