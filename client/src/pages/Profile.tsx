@@ -110,21 +110,21 @@ const Profile = () => {
         <div className="profile-content overflow-y-auto pr-1">
           <div className="profile-kpis">
             <div className="profile-kpi">
-              <p className="text-gray-400 text-xs mb-0.5">24h Base</p>
+              <p className="text-gray-400 text-xs mb-0.5">Estimated Cost Basis</p>
               <p className="text-sm font-bold text-white">${pnlData?.totalInvested.toFixed(2) || "0.00"}</p>
             </div>
             <div className="profile-kpi">
-              <p className="text-gray-400 text-xs mb-0.5">Current</p>
+              <p className="text-gray-400 text-xs mb-0.5">Market Value</p>
               <p className="text-sm font-bold text-white">${pnlData?.currentValue.toFixed(2) || "0.00"}</p>
             </div>
             <div className="profile-kpi">
-              <p className="text-gray-400 text-xs mb-0.5">P&L</p>
+              <p className="text-gray-400 text-xs mb-0.5">Total P&L</p>
               <p className={`text-sm font-bold ${(pnlData?.totalPnL || 0) >= 0 ? "text-green-400" : "text-red-400"}`}>
                 ${(pnlData?.totalPnL || 0).toFixed(2)}
               </p>
             </div>
             <div className="profile-kpi">
-              <p className="text-gray-400 text-xs mb-0.5">Move</p>
+              <p className="text-gray-400 text-xs mb-0.5">24h Performance</p>
               <div className="flex items-center gap-1">
                 {(pnlData?.pnlPercent || 0) >= 0 ? <TrendingUp className="text-green-400" size={12} /> : <TrendingDown className="text-red-400" size={12} />}
                 <p className={`text-sm font-bold ${(pnlData?.pnlPercent || 0) >= 0 ? "text-green-400" : "text-red-400"}`}>

@@ -463,7 +463,10 @@ const WebGraph = () => {
     return (
       <g
         key={node.id}
-        onClick={() => handleNodeClick(node)}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleNodeClick(node);
+        }}
         onMouseEnter={(e) => handleNodeHover(node, e)}
         onMouseMove={(e) => handleNodeHover(node, e)}
         onMouseLeave={handleNodeLeave}
@@ -639,6 +642,7 @@ const WebGraph = () => {
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
+                onClick={() => setSelectedNode(null)}
               >
                 {/* LINKS TO CENTER (Solar System) */}
 
@@ -826,11 +830,7 @@ const WebGraph = () => {
 
                     <div className="mesh-detail-card">
                       <p className="mesh-detail-label">
-                        {Math.abs(selectedNode.totalSolTransferred) > 0
-                          ? "Total SOL Transferred"
-                          : selectedNode.transactions?.some((tx) => tx.tokenAmount)
-                          ? "Total Token Transferred"
-                          : "Total SOL Transferred"}
+                        Interaction Volume
                       </p>
 
                       <p className="text-2xl font-bold text-cyan-300 mt-2">

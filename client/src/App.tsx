@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import ReclaimRent from "./pages/ReclaimRent";
 import WebGraph from "./pages/WebGraph";
 import { AIChat } from "./components/AIChat";
+import { PageGuide } from "./components/PageGuide";
 
 function App() {
   const { publicKey } = useWallet();
@@ -29,6 +30,8 @@ function App() {
         </main>
         {/* AI Chat Assistant - floating button */}
         <AIChat walletAddress={walletAddress} />
+        {/* Page Info Guide - floating button */}
+        <PageGuide />
       </div>
     </div>
   );

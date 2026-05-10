@@ -103,6 +103,17 @@ const Notifications = () => {
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [tzSearch, setTzSearch] = useState("");
   const [tzOpen, setTzOpen] = useState(false);
+  const tzRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tzOpen && tzRef.current && !tzRef.current.contains(event.target as Node)) {
+        setTzOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [tzOpen]);
 
   // =============================================
   // FETCH INITIAL STATUS + SETTINGS
@@ -162,7 +173,7 @@ const Notifications = () => {
           setOtpExpiry(null);
           stopPolling();
         }
-      } catch {}
+      } catch { }
     }, 3000);
   }, [walletAddress]);
 
@@ -329,7 +340,7 @@ const Notifications = () => {
       {/* =========================================
           SECTION 1 — TELEGRAM CONNECT
       ========================================= */}
-      <div className="glass-panel p-4 rounded-xl border border-gray-700/50 space-y-3">
+      <div className="glass-panel mt-1 p-4 rounded-xl border border-gray-700/50 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-[#229ED9]/10 flex items-center justify-center">
@@ -372,16 +383,14 @@ const Notifications = () => {
               <button
                 id="notifications-toggle"
                 onClick={() => handleToggle(!settings.notificationsEnabled)}
-                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${
-                  settings.notificationsEnabled
-                    ? "bg-violet-600"
-                    : "bg-gray-700"
-                }`}
+                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${settings.notificationsEnabled
+                  ? "bg-violet-600"
+                  : "bg-gray-700"
+                  }`}
               >
                 <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${
-                    settings.notificationsEnabled ? "left-[18px]" : "left-0.5"
-                  }`}
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${settings.notificationsEnabled ? "left-[18px]" : "left-0.5"
+                    }`}
                 />
               </button>
             </div>
@@ -392,9 +401,9 @@ const Notifications = () => {
               disabled={revoking}
               className="flex items-center ml-auto px-2 border rounded-full text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
             >
-             
+
               {revoking ? <Loader2 size={10} className="animate-spin" /> : <Unlink size={10} />}
-               
+
               Disconnect
             </button>
           </div>
@@ -481,17 +490,16 @@ const Notifications = () => {
                 <p className="text-[11px] text-gray-500">Morning and evening AI reports</p>
               </div>
             </div>
-            
+
             {/* Save button - top right */}
             <button
               id="save-settings-btn-top"
               onClick={handleSaveSettings}
               disabled={settingsLoading}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${
-                settingsSaved
-                  ? "bg-green-600/20 text-green-400 border border-green-600/30"
-                  : "bg-violet-600 hover:bg-violet-700 text-white"
-              } disabled:opacity-60`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${settingsSaved
+                ? "bg-green-600/20 text-green-400 border border-green-600/30"
+                : "bg-violet-600 hover:bg-violet-700 text-white"
+                } disabled:opacity-60`}
             >
               {settingsLoading ? (
                 <Loader2 size={10} className="animate-spin" />
@@ -514,7 +522,7 @@ const Notifications = () => {
             <label className="text-[10px] text-gray-400 flex items-center gap-1">
               <Globe size={10} /> Timezone
             </label>
-            <div className="relative">
+            <div className="relative" ref={tzRef}>
               <button
                 id="timezone-selector"
                 onClick={() => setTzOpen(!tzOpen)}
@@ -544,9 +552,8 @@ const Notifications = () => {
                           setTzOpen(false);
                           setTzSearch("");
                         }}
-                        className={`w-full text-left px-2.5 py-1 text-[10px] hover:bg-gray-800 transition-colors ${
-                          settings.timezone === tz.value ? "text-violet-400" : "text-gray-300"
-                        }`}
+                        className={`w-full text-left px-2.5 py-1 text-[10px] hover:bg-gray-800 transition-colors ${settings.timezone === tz.value ? "text-violet-400" : "text-gray-300"
+                          }`}
                       >
                         {tz.label}
                       </button>
@@ -577,14 +584,12 @@ const Notifications = () => {
               />
               <button
                 onClick={() => setSettings((s) => ({ ...s, morningSummaryEnabled: !s.morningSummaryEnabled }))}
-                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${
-                  settings.morningSummaryEnabled ? "bg-violet-600" : "bg-gray-700"
-                }`}
+                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${settings.morningSummaryEnabled ? "bg-violet-600" : "bg-gray-700"
+                  }`}
               >
                 <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${
-                    settings.morningSummaryEnabled ? "left-[18px]" : "left-0.5"
-                  }`}
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${settings.morningSummaryEnabled ? "left-[18px]" : "left-0.5"
+                    }`}
                 />
               </button>
             </div>
@@ -610,14 +615,12 @@ const Notifications = () => {
               />
               <button
                 onClick={() => setSettings((s) => ({ ...s, nightSummaryEnabled: !s.nightSummaryEnabled }))}
-                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${
-                  settings.nightSummaryEnabled ? "bg-violet-600" : "bg-gray-700"
-                }`}
+                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${settings.nightSummaryEnabled ? "bg-violet-600" : "bg-gray-700"
+                  }`}
               >
                 <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${
-                    settings.nightSummaryEnabled ? "left-[18px]" : "left-0.5"
-                  }`}
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${settings.nightSummaryEnabled ? "left-[18px]" : "left-0.5"
+                    }`}
                 />
               </button>
             </div>
