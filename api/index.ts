@@ -11,7 +11,7 @@
 // =============================================
 
 // Validate env first — fails fast with clear error
-import "./src/utils/env";
+import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import router from "./router/router";
