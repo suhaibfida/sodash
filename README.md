@@ -1,5 +1,5 @@
 # sodash
-AI-powered Solana portfolio tracker. Features a dynamic interaction graph (D3-style), Helius-synced wallet analytics, and automated Telegram notifications. Bun + React + Prisma.
+A premium Solana portfolio dashboard featuring interactive wallet relationship graphs, real-time PnL analytics, and AI-powered Telegram alerts. Built with React, Bun, and Helius.
 
 
 <img width="14203" height="7147" alt="page" src="https://github.com/user-attachments/assets/34bab93f-6780-4eaf-ae77-1597fa48016d" />
