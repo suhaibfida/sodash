@@ -7,7 +7,6 @@ module.exports = {
       args: "tsx index.ts",
       instances: 1,
       exec_mode: "fork",
-      env_file: "./.env",
 
       error_file: "./logs/api-error.log",
       out_file: "./logs/api-out.log",
