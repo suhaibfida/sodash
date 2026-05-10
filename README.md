@@ -8,7 +8,8 @@ A premium Solana portfolio dashboard featuring interactive wallet relationship g
 <img width="1346" height="596" alt="image" src="https://github.com/user-attachments/assets/734b12f4-3ce8-43c5-bbb4-9cd9bd77be79" />
 <img width="1350" height="609" alt="image" src="https://github.com/user-attachments/assets/33134be2-1f26-4d51-ae7e-94b5372c14e1" />
 <img width="1329" height="593" alt="image" src="https://github.com/user-attachments/assets/398fc812-90b6-4681-a7a5-4242ee9a3fa7" />
-<img width="437" height="614" alt="image" src="https://github.com/user-attachments/assets/47fa5ab9-3003-4a18-9365-e5a9a2c4cd65" />
+<img width="1193" height="533" alt="image" src="https://github.com/user-attachments/assets/ea627602-35fb-4357-a2f4-445e196e60b5" />
+
 
 
 
