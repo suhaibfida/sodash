@@ -100,6 +100,6 @@ jobs:
             # cd ..
 
             # Restart PM2
-            pm2 startOrReload ecosystem.config.js --update-env
+            pm2 startOrReload ecosystem.config.cjs --update-env
             pm2 save
             pm2 list
