@@ -4,7 +4,7 @@ module.exports = {
       name: "api",
       script: "./api/index.ts",
       interpreter: "bun",
-      instances: 2,
+      instances: 1,
       exec_mode: "cluster",
       env: {
         // ===== SERVER =====
