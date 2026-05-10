@@ -18,6 +18,18 @@ import type { GraphData, GraphNode, InteractionDetail } from "../types";
 
 import { getWalletGraph, getInteractionDetail } from "../lib/solana";
 
+const KNOWN_TOKENS: Record<string, string> = {
+  "So11111111111111111111111111111111111111112": "SOL",
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "USDC",
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB": "USDT",
+  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": "BONK",
+  "WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCdR": "WEN",
+  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbZedPFTEPm3": "JUP",
+  "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3GBw1xG1BqF5A": "PYTH",
+  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So": "mSOL",
+  "7dHbWXmci3dT8UFYWYZweRYvrTicR42ZE5q2S1d2r2Zp": "stSOL",
+};
+
 const WebGraph = () => {
   const { publicKey, connected } = useWallet();
 
@@ -36,6 +48,8 @@ const WebGraph = () => {
     null,
   );
 
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
   const [detailLoading, setDetailLoading] = useState(false);
 
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
@@ -46,10 +60,10 @@ const WebGraph = () => {
   });
 
   const [viewBox, setViewBox] = useState({
-    x: 0,
-    y: 0,
-    w: 1000,
-    h: 1000,
+    x: 70,
+    y: 95,
+    w: 860,
+    h: 860,
   });
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -64,17 +78,17 @@ const WebGraph = () => {
   });
 
   const viewBoxStart = useRef({
-    x: 0,
-    y: 0,
-    w: 1000,
-    h: 1000,
+    x: 70,
+    y: 95,
+    w: 860,
+    h: 860,
   });
 
   const DEFAULT_VB = {
-    x: 0,
-    y: 0,
-    w: 1000,
-    h: 1000,
+    x: 70,
+    y: 95,
+    w: 860,
+    h: 860,
   };
 
   /* =====================================
@@ -134,6 +148,7 @@ const WebGraph = () => {
         setDetailLoading(true);
 
         setSelectedNode(null);
+        setSelectedNodeId(node.id);
 
         const detail = await getInteractionDetail(
           node.id,
@@ -235,7 +250,7 @@ const WebGraph = () => {
 
       const my = ((e.clientY - rect.top) / rect.height) * viewBox.h + viewBox.y;
 
-      const scale = e.deltaY > 0 ? 1.08 : 0.92;
+      const scale = e.deltaY > 0 ? 1.05 : 0.95;
 
       const nw = Math.max(220, Math.min(viewBox.w * scale, DEFAULT_VB.w * 3));
 
@@ -298,11 +313,13 @@ const WebGraph = () => {
 
     const rect = svgRef.current.getBoundingClientRect();
 
+    // 1:1 mapping for free movement (no artificial damping)
+    const damping = 1.0;
     const dx =
-      ((e.clientX - panStart.current.x) / rect.width) * viewBoxStart.current.w;
+      ((e.clientX - panStart.current.x) / rect.width) * viewBoxStart.current.w * damping;
 
     const dy =
-      ((e.clientY - panStart.current.y) / rect.height) * viewBoxStart.current.h;
+      ((e.clientY - panStart.current.y) / rect.height) * viewBoxStart.current.h * damping;
 
     setViewBox({
       x: viewBoxStart.current.x - dx,
@@ -323,10 +340,87 @@ const WebGraph = () => {
      HELPERS
   ===================================== */
 
-  const nodeById = useMemo(
-    () => new Map(graphData.nodes.map((node) => [node.id, node])),
-    [graphData.nodes],
-  );
+  const { nodeById, positionedNodes, centerLinks } = useMemo(() => {
+    const center = graphData.nodes.find((node) => node.label === "You");
+    const outerNodes = graphData.nodes.filter((node) => node !== center);
+
+    // Group by category
+    const byCategory: Record<string, typeof outerNodes> = {
+      exchange: [],
+      wallet: [],
+      program: [],
+      token: [],
+    };
+
+    for (const node of outerNodes) {
+      const cat = node.category || "wallet";
+      if (!byCategory[cat]) {
+        byCategory[cat] = [];
+      }
+      byCategory[cat].push(node);
+    }
+
+    // Define orbital radii for each category
+    const orbits: Record<string, number> = {
+      exchange: 350,
+      wallet: 250,
+      program: 300,
+      token: 200,
+    };
+
+    const positioned: GraphNode[] = [];
+    
+    if (center) {
+      positioned.push({ ...center, x: 0, y: 0 });
+    }
+
+    Object.entries(byCategory).forEach(([category, nodes]) => {
+      const radius = orbits[category] || 200;
+      
+      nodes.forEach((node, index) => {
+        let angle = 0;
+        
+        if (category === "program") {
+          // Do not align horizontally, cluster at the top with fixed spacing
+          const spacing = Math.PI / 6; // 30 degrees space between programs
+          const startAngle = -Math.PI / 2 - ((nodes.length - 1) * spacing) / 2;
+          angle = startAngle + index * spacing;
+        } else if (category === "exchange") {
+          // Cluster exchanges at the bottom
+          const spacing = Math.PI / 6;
+          const startAngle = Math.PI / 2 - ((nodes.length - 1) * spacing) / 2;
+          angle = startAngle + index * spacing;
+        } else if (category === "token") {
+          // Cluster tokens at the bottom-right or somewhere else
+          const spacing = Math.PI / 6;
+          const startAngle = Math.PI / 4 - ((nodes.length - 1) * spacing) / 2;
+          angle = startAngle + index * spacing;
+        } else {
+          // Spread wallets evenly around the circle
+          angle = (Math.PI * 2 * index) / Math.max(nodes.length, 1);
+        }
+        
+        positioned.push({
+          ...node,
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+        });
+      });
+    });
+
+    // Links from center to all nodes
+    const centerLinks = outerNodes.map((node) => ({
+      source: center?.id || "",
+      target: node.id,
+      value: 1,
+    }));
+
+    return {
+      nodeById: new Map(positioned.map((node) => [node.id, node])),
+      positionedNodes: positioned,
+      centerLinks,
+    };
+  }, [graphData.nodes]);
 
   const getNode = (value: string | GraphNode) => {
     if (typeof value === "string") {
@@ -358,8 +452,23 @@ const WebGraph = () => {
               : "#f59e0b";
 
     const x = 500 + (node.x || 0);
-
     const y = 500 + (node.y || 0);
+    
+    const isSelected = selectedNodeId === node.id;
+
+    const orbitR1 = radius + 14;
+    const orbitR2 = radius + 26;
+    const orbitR3 = radius + 38;
+
+    const dotR = 2.5;
+    const t = Date.now() / 4000;
+    const orbitDots = [
+      { angle: t, r: orbitR1, opacity: 0.6, size: dotR },
+      { angle: t + Math.PI * 0.66, r: orbitR1, opacity: 0.4, size: dotR * 0.7 },
+      { angle: t + Math.PI * 1.33, r: orbitR2, opacity: 0.5, size: dotR * 0.9 },
+      { angle: -t * 0.7 + 1, r: orbitR2, opacity: 0.35, size: dotR * 0.6 },
+      { angle: t * 0.5 + 2.5, r: orbitR3, opacity: 0.3, size: dotR * 0.8 },
+    ];
 
     return (
       <g
@@ -368,43 +477,70 @@ const WebGraph = () => {
         onMouseEnter={(e) => handleNodeHover(node, e)}
         onMouseMove={(e) => handleNodeHover(node, e)}
         onMouseLeave={handleNodeLeave}
-        className="mesh-node cursor-pointer transition-opacity hover:opacity-100"
-        style={{
-          opacity: node.label === "You" ? 1 : 0.85,
-        }}
+        className="mesh-node cursor-pointer"
+        style={{ opacity: node.label === "You" ? 1 : 0.85 }}
       >
-        <circle cx={x} cy={y} r={radius + 24} fill={color} opacity="0.08" />
+        {/* Outer glow */}
+        <circle cx={x} cy={y} r={radius + 40} fill={color} opacity="0.04" />
 
+        {/* Orbit rings */}
+        <circle cx={x} cy={y} r={orbitR1} fill="none" stroke={color} strokeOpacity="0.12" strokeWidth="1" strokeDasharray="3 6" />
+        <circle cx={x} cy={y} r={orbitR2} fill="none" stroke={color} strokeOpacity="0.08" strokeWidth="0.8" strokeDasharray="2 8" />
+        <circle cx={x} cy={y} r={orbitR3} fill="none" stroke={color} strokeOpacity="0.05" strokeWidth="0.6" strokeDasharray="1.5 10" />
+
+        {/* Selection Highlight */}
+        {isSelected && (
+          <circle cx={x} cy={y} r={radius + 18} fill="none" stroke="#ffffff" strokeWidth="4" opacity="1" className="animate-pulse" />
+        )}
+
+        {/* Orbiting dots */}
+        {orbitDots.map((dot, i) => (
+          <circle
+            key={i}
+            cx={x + Math.cos(dot.angle) * dot.r}
+            cy={y + Math.sin(dot.angle) * dot.r}
+            r={dot.size}
+            fill={color}
+            opacity={dot.opacity}
+          />
+        ))}
+
+        {/* Node ring */}
         <circle
           className="mesh-node-ring"
           cx={x}
           cy={y}
-          r={radius + 12}
+          r={radius + 8}
           fill="none"
           stroke={color}
           strokeOpacity="0.35"
-          strokeWidth="2.5"
+          strokeWidth="2"
         />
 
-        <circle cx={x} cy={y} r={radius + 6} fill={color} opacity="0.15" />
+        {/* Inner glow */}
+        <circle cx={x} cy={y} r={radius + 4} fill={color} opacity="0.15" />
 
+        {/* Main body */}
         <circle cx={x} cy={y} r={radius} fill={color} opacity="0.92" />
 
+        {/* Highlight */}
         <circle
-          cx={x - radius * 0.28}
-          cy={y - radius * 0.28}
-          r={radius * 0.4}
+          cx={x - radius * 0.25}
+          cy={y - radius * 0.25}
+          r={radius * 0.35}
           fill="#ffffff"
-          opacity="0.25"
+          opacity="0.2"
         />
 
-        <circle cx={x} cy={y} r={radius * 0.2} fill="#ffffff" opacity="0.75" />
+        {/* Core */}
+        <circle cx={x} cy={y} r={radius * 0.18} fill="#ffffff" opacity="0.7" />
 
+        {/* Label */}
         <text
           x={x}
-          y={y + radius + 26}
+          y={y + radius + 28}
           textAnchor="middle"
-          className="fill-gray-100 text-[13px] font-semibold select-none pointer-events-none"
+          className="fill-gray-100 text-[12px] font-semibold select-none pointer-events-none"
         >
           {node.label}
         </text>
@@ -508,46 +644,68 @@ const WebGraph = () => {
               <svg
                 ref={svgRef}
                 viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-                className="mesh-web-svg relative z-[1] h-[72vh] min-h-[350px] max-h-[780px] w-full select-none"
+                className="mesh-web-svg relative z-[1] h-[65vh] min-h-[350px] max-h-[700px] w-full select-none"
                 role="img"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
               >
-                {/* LINKS */}
+                {/* LINKS TO CENTER (Solar System) */}
 
-                {graphData.links.map((link, index) => {
+                {centerLinks.map((link, index) => {
                   const source = getNode(link.source as string | GraphNode);
-
                   const target = getNode(link.target as string | GraphNode);
 
                   if (!source || !target) {
                     return null;
                   }
 
-                  const opacity = Math.max(
-                    0.15,
-                    Math.min(0.45, (link.value || 1) * 0.1),
-                  );
+                  const sx = 500 + (source.x || 0);
+                  const sy = 500 + (source.y || 0);
+                  const tx = 500 + (target.x || 0);
+                  const ty = 500 + (target.y || 0);
+
+                  // Determine line color by target category
+                  const categoryColors: Record<string, string> = {
+                    exchange: "#f59e0b",
+                    wallet: "#22c55e",
+                    program: "#38bdf8",
+                    token: "#ec4899",
+                  };
+                  const color =
+                    categoryColors[target.category || "wallet"] || "#9ca3af";
+
+                  const opacity = 0.18;
 
                   return (
-                    <line
-                      key={`${index}`}
-                      className="mesh-link"
-                      x1={500 + (source.x || 0)}
-                      y1={500 + (source.y || 0)}
-                      x2={500 + (target.x || 0)}
-                      y2={500 + (target.y || 0)}
-                      stroke="#64748b"
-                      strokeOpacity={opacity}
-                      strokeWidth="2"
-                    />
+                    <g key={`center-link-${index}`}>
+                      <line
+                        x1={sx}
+                        y1={sy}
+                        x2={tx}
+                        y2={ty}
+                        stroke={color}
+                        strokeOpacity={opacity}
+                        strokeWidth="1.5"
+                        strokeDasharray="5 7"
+                      />
+                      <line
+                        x1={sx}
+                        y1={sy}
+                        x2={tx}
+                        y2={ty}
+                        stroke={color}
+                        strokeOpacity={0.06}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                      />
+                    </g>
                   );
                 })}
 
                 {/* NODES */}
 
-                {graphData.nodes.map(renderNode)}
+                {positionedNodes.map(renderNode)}
               </svg>
 
               {/* CONTROLS */}
@@ -612,7 +770,10 @@ const WebGraph = () => {
                     </h2>
 
                     <button
-                      onClick={() => setSelectedNode(null)}
+                      onClick={() => {
+                        setSelectedNode(null);
+                        setSelectedNodeId(null);
+                      }}
                       className="text-gray-500 hover:text-white"
                     >
                       <X size={18} />
@@ -674,10 +835,34 @@ const WebGraph = () => {
                     {/* SOL */}
 
                     <div className="mesh-detail-card">
-                      <p className="mesh-detail-label">Total SOL Transferred</p>
+                      <p className="mesh-detail-label">
+                        {Math.abs(selectedNode.totalSolTransferred) > 0
+                          ? "Total SOL Transferred"
+                          : selectedNode.transactions?.some((tx) => tx.tokenAmount)
+                          ? "Total Token Transferred"
+                          : "Total SOL Transferred"}
+                      </p>
 
                       <p className="text-2xl font-bold text-cyan-300 mt-2">
-                        {selectedNode.totalSolTransferred.toFixed(4)} SOL
+                        {Math.abs(selectedNode.totalSolTransferred) > 0 ? (
+                          `${Math.abs(selectedNode.totalSolTransferred).toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 })} SOL`
+                        ) : selectedNode.transactions?.some((tx) => tx.tokenAmount !== undefined) ? (
+                          (() => {
+                            const tokenTotal = selectedNode.transactions?.reduce(
+                              (sum, tx) => sum + Math.abs(tx.tokenAmount ?? 0),
+                              0,
+                            );
+                            const tokenMint =
+                              selectedNode.transactions?.find((tx) => tx.tokenMint)
+                                ?.tokenMint;
+                            const tokenSymbol = tokenMint 
+                                ? (KNOWN_TOKENS[tokenMint] || tokenMint.slice(0, 4).toUpperCase()) 
+                                : "TOKEN";
+                            return `${tokenTotal?.toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 }) ?? 0} ${tokenSymbol}`;
+                          })()
+                        ) : (
+                          "0 SOL"
+                        )}
                       </p>
                     </div>
 
@@ -736,7 +921,12 @@ const WebGraph = () => {
 
                                 <div className="text-right">
                                   <p className="text-cyan-300 text-sm font-semibold">
-                                    {tx.amount.toFixed(4)} SOL
+                                    {tx.tokenAmount !== undefined && tx.tokenAmount !== null
+                                      ? (() => {
+                                          const symbol = tx.tokenMint ? (KNOWN_TOKENS[tx.tokenMint] || tx.tokenMint.slice(0, 4).toUpperCase()) : "TOKEN";
+                                          return `${Math.abs(tx.tokenAmount).toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 })} ${symbol}`;
+                                        })()
+                                      : `${Math.abs(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 })} SOL`}
                                   </p>
                                 </div>
                               </div>

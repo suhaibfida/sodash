@@ -755,17 +755,41 @@ class BlockchainService {
       if (!tx?.transaction?.message) continue;
 
       const message = tx.transaction.message;
-      const accountKeys: string[] =
-        "accountKeys" in message
-          ? (
-              message.accountKeys as Array<{ pubkey: { toBase58(): string } }>
-            ).map((k) => k.pubkey.toBase58())
-          : [];
+      const accountKeys: string[] = Array.isArray(
+        (message as any).accountKeys,
+      )
+        ? (message as any).accountKeys
+            .map((k: any) => {
+              if (!k) return "";
+              if (typeof k === "string") return k;
+              if (typeof k.toBase58 === "function") return k.toBase58();
+              if (k.pubkey && typeof k.pubkey.toBase58 === "function") {
+                return k.pubkey.toBase58();
+              }
+              return "";
+            })
+            .filter(Boolean)
+        : [];
 
-      // Compute rough SOL delta for this transaction
+      // Compute actual SOL transferred on this transaction using pre/post balance differences.
       const meta = tx.meta;
-      const solDelta =
-        meta?.fee !== undefined ? Math.abs(meta.fee) / LAMPORTS_PER_SOL : 0;
+      const preBalances = meta?.preBalances ?? [];
+      const postBalances = meta?.postBalances ?? [];
+      let walletDelta = 0;
+
+      for (let ai = 0; ai < accountKeys.length; ai++) {
+        const addr = accountKeys[ai];
+        const pre = preBalances[ai] ?? 0;
+        const post = postBalances[ai] ?? 0;
+        const delta = (post - pre) / LAMPORTS_PER_SOL;
+        if (addr === address) {
+          walletDelta = delta;
+          break;
+        }
+      }
+
+      const fee = meta?.fee ? meta.fee / LAMPORTS_PER_SOL : 0;
+      const solDelta = Math.max(0, Math.abs(walletDelta) - fee);
 
       for (const key of accountKeys) {
         if (key === address) continue;
@@ -877,6 +901,7 @@ class BlockchainService {
         source: address,
         target: addr,
         value: stats.interactionCount,
+        sol: stats.totalSolTransferred,
         label: `${stats.interactionCount} tx`,
       });
       linkCount++;
@@ -920,6 +945,16 @@ class BlockchainService {
       const graph = await this.buildGraphFromAddress(address);
 
       // Map graph nodes to InteractionDetail (skip the center node)
+      // Build a map of totalSolTransferred from the graph build step
+      const solByCounterparty = new Map<string, number>();
+      for (const link of graph.links) {
+        const targetId = typeof link.target === "string" ? link.target : link.target.id;
+        const sol = (link as { sol?: number }).sol ?? 0;
+        if (targetId && sol > 0) {
+          solByCounterparty.set(targetId, (solByCounterparty.get(targetId) ?? 0) + sol);
+        }
+      }
+
       const interactions: InteractionDetail[] = graph.nodes
         .filter((n) => n.id !== address)
         .map((node) => {
@@ -939,7 +974,7 @@ class BlockchainService {
             programName: node.programName,
             exchange: node.exchange,
             interactionCount,
-            totalSolTransferred: 0, // aggregate SOL detail requires deeper tx parsing
+            totalSolTransferred: solByCounterparty.get(node.id) ?? 0,
             lastInteraction: 0,
             transactions: [],
           };
@@ -997,6 +1032,9 @@ class BlockchainService {
         type: string;
         amount: number;
         timestamp: number;
+        tokenAmount?: number;
+        tokenMint?: string;
+        tokenDecimals?: number;
       }
 
       const relevantTxs: TxEntry[] = [];
@@ -1022,16 +1060,112 @@ class BlockchainService {
         const ts = tx.blockTime ?? 0;
         if (ts > lastTs) lastTs = ts;
 
-        const feeSol = (tx.meta?.fee ?? 0) / LAMPORTS_PER_SOL;
-        totalSol += feeSol;
+        // Calculate actual SOL transferred between wallet and target
+        // using pre/post balance differences and handle both send/receive cases.
+        const preBalances = tx.meta?.preBalances ?? [];
+        const postBalances = tx.meta?.postBalances ?? [];
+        let walletDelta = 0;
+        let targetDelta = 0;
+
+        for (let ai = 0; ai < accountKeys.length; ai++) {
+          const addr = accountKeys[ai];
+          const pre = preBalances[ai] ?? 0;
+          const post = postBalances[ai] ?? 0;
+          const delta = (post - pre) / LAMPORTS_PER_SOL;
+
+          if (addr === walletAddress) {
+            walletDelta = delta;
+          }
+          if (addr === targetAddress) {
+            targetDelta = delta;
+          }
+        }
+
+        let solTransferred = 0;
+        if (walletDelta < 0 && targetDelta > 0) {
+          solTransferred = Math.min(Math.abs(walletDelta), targetDelta);
+        } else if (walletDelta > 0 && targetDelta < 0) {
+          solTransferred = Math.min(walletDelta, Math.abs(targetDelta));
+        } else {
+          // Fallback for edge cases where one side is not strictly matched
+          solTransferred = Math.max(Math.abs(walletDelta), Math.abs(targetDelta));
+        }
+
+        const netSol = Math.max(0, solTransferred);
+        totalSol += netSol;
 
         const sig = sigStrings[i];
         if (!sig) continue;
+
+        const preTokenBalances = tx.meta?.preTokenBalances ?? [];
+        const postTokenBalances = tx.meta?.postTokenBalances ?? [];
+        const tokenBalanceByKey = new Map<string, {
+          pre: number;
+          post: number;
+          mint: string;
+          decimals: number;
+          owner?: string;
+        }>();
+
+        const collectTokenBalance = (
+          balance: any,
+          idx: number,
+          isPre: boolean,
+        ) => {
+          const accountIndex = String(balance.accountIndex ?? idx);
+          const ui = balance.uiTokenAmount ?? {};
+          const mint = balance.mint ?? "";
+          const decimals = Number(ui.decimals ?? 0);
+          const amount = Number(ui.uiAmount ?? 0);
+          const owner = balance.owner ?? "";
+
+          const entry = tokenBalanceByKey.get(accountIndex) ?? {
+            pre: 0,
+            post: 0,
+            mint,
+            decimals,
+            owner,
+          };
+
+          if (isPre) {
+            entry.pre = amount;
+          } else {
+            entry.post = amount;
+          }
+          entry.mint = entry.mint || mint;
+          entry.decimals = entry.decimals || decimals;
+          entry.owner = entry.owner || owner;
+          tokenBalanceByKey.set(accountIndex, entry);
+        };
+
+        preTokenBalances.forEach((balance, idx) => {
+          collectTokenBalance(balance, idx, true);
+        });
+        postTokenBalances.forEach((balance, idx) => {
+          collectTokenBalance(balance, idx, false);
+        });
+
+        let tokenAmount = 0;
+        let tokenMint = "";
+        let tokenDecimals = 0;
+
+        for (const { pre, post, mint, decimals } of tokenBalanceByKey.values()) {
+          const delta = post - pre;
+          if (Math.abs(delta) > Math.abs(tokenAmount)) {
+            tokenAmount = delta;
+            tokenMint = mint;
+            tokenDecimals = decimals;
+          }
+        }
+
         relevantTxs.push({
           signature: sig,
           type: "transaction",
-          amount: feeSol,
+          amount: netSol,
           timestamp: ts,
+          tokenAmount: tokenAmount !== 0 ? Math.abs(tokenAmount) : undefined,
+          tokenMint: tokenAmount !== 0 ? tokenMint : undefined,
+          tokenDecimals: tokenAmount !== 0 ? tokenDecimals : undefined,
         });
       }
 

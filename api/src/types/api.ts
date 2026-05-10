@@ -63,6 +63,9 @@ export interface InteractionDetail {
     type: string;
     amount: number;
     timestamp: number;
+    tokenAmount?: number;
+    tokenMint?: string;
+    tokenDecimals?: number;
   }>;
 }
 
@@ -114,5 +117,6 @@ export interface GraphLink {
   source: string | GraphNode;
   target: string | GraphNode;
   value: number;
+  sol?: number;
   label?: string;
 }

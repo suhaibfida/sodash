@@ -56,27 +56,64 @@ const Dashboard = () => {
   const totalValue =
     solBalance * solPrice + tokens.reduce((sum, t) => sum + t.usdValue, 0);
 
-  const portfolioUp = totalValue >= 0;
-  const visibleTokens = tokens.slice(0, 6);
-
   // 3 most recently interacted tokens not in current wallet
   const recentPrev = previousTokens
     .slice()
     .sort((a, b) => b.lastSeen - a.lastSeen)
     .slice(0, 3);
 
-  const miniSeries = portfolioUp
-    ? [28, 32, 30, 35, 34, 38, 41, 46]
-    : [46, 44, 42, 39, 37, 35, 32, 29];
-  const min = Math.min(...miniSeries);
-  const max = Math.max(...miniSeries);
+  // Build mini chart from real token data
+  // Use weighted priceChange24h across holdings to shape the curve
+  const hasHoldings = totalValue > 0;
+  const weightedChange = hasHoldings
+    ? tokens.reduce((sum, t) => sum + t.priceChange24h * (t.usdValue / totalValue), 0)
+    : 0;
+  const chartUp = weightedChange >= 0;
+  const portfolioUp = chartUp;
+  const visibleTokens = tokens.slice(0, 6);
+
+  // Generate 8 data points simulating 24h price movement based on weighted change
+  const miniSeries: number[] = (() => {
+    if (!hasHoldings) return [23, 23, 23, 23, 23, 23, 23, 23]; // flat line
+    const startVal = 30;
+    const endVal = 30 + weightedChange * 0.4;
+    const pts: number[] = [];
+    for (let i = 0; i < 8; i++) {
+      const progress = i / 7;
+      const base = startVal + (endVal - startVal) * progress;
+      // small jitter for realism
+      const jitter = (Math.sin(i * 1.8) * 1.5);
+      pts.push(Math.max(5, Math.min(45, base + jitter)));
+    }
+    return pts;
+  })();
+
+  const minV = Math.min(...miniSeries);
+  const maxV = Math.max(...miniSeries);
+  const range = Math.max(1, maxV - minV);
   const points = miniSeries
     .map((v, i) => {
       const x = (i / (miniSeries.length - 1)) * 100;
-      const y = 44 - ((v - min) / Math.max(1, max - min)) * 36;
+      const y = 44 - ((v - minV) / range) * 36;
       return `${x},${y}`;
     })
     .join(" ");
+
+  const lineColor = !hasHoldings
+    ? "rgba(148,163,184,.45)" // grey flat
+    : chartUp
+      ? "#22c55e"
+      : "#ef4444";
+  const fillTop = !hasHoldings
+    ? "rgba(148,163,184,.12)"
+    : chartUp
+      ? "rgba(34,197,94,.32)"
+      : "rgba(239,68,68,.28)";
+  const fillBot = !hasHoldings
+    ? "rgba(148,163,184,0)"
+    : chartUp
+      ? "rgba(34,197,94,0)"
+      : "rgba(239,68,68,0)";
 
   const gradients = [
     "linear-gradient(135deg,#8b5cf6,#6366f1)",
@@ -104,21 +141,28 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-shell">
-      {/* PORTFOLIO VALUE */}
-      <div className="glass-panel value-card">
+    <div className="dashboard-shell dashboard-sticky-layout">
+      {/* PORTFOLIO VALUE — sticky */}
+      <div className="glass-panel value-card value-card-sticky">
         <div className="value-left">
           <div className="value-label text-xs">Portfolio Value</div>
           <div
-            className={`value-amount text-lg ${portfolioUp ? "portfolio-up" : "portfolio-down"}`}
+            className={`value-amount text-lg ${!hasHoldings ? "text-slate-400" : portfolioUp ? "portfolio-up" : "portfolio-down"}`}
           >
             ${totalValue.toFixed(2)}
           </div>
           <div className="value-subtext text-xs">
-            <span
-              className={`portfolio-indicator ${portfolioUp ? "portfolio-indicator-up" : "portfolio-indicator-down"}`}
-            />
-            {portfolioUp ? "↑ Up" : "↓ Down"}
+            {!hasHoldings ? (
+              <span className="text-slate-500">—</span>
+            ) : (
+              <>
+                <span
+                  className={`portfolio-indicator ${portfolioUp ? "portfolio-indicator-up" : "portfolio-indicator-down"}`}
+                />
+                {portfolioUp ? "↑ Up" : "↓ Down"}
+                <span className="ml-1 opacity-70">({Math.abs(weightedChange).toFixed(2)}%)</span>
+              </>
+            )}
           </div>
         </div>
         <div className="mini-chart-container">
@@ -129,31 +173,19 @@ const Dashboard = () => {
             aria-hidden="true"
           >
             <defs>
-              <linearGradient
-                id="portfolioMiniFill"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="0%"
-                  stopColor={
-                    portfolioUp ? "rgba(34,197,94,.38)" : "rgba(239,68,68,.34)"
-                  }
-                />
-                <stop
-                  offset="100%"
-                  stopColor={
-                    portfolioUp ? "rgba(34,197,94,0)" : "rgba(239,68,68,0)"
-                  }
-                />
+              <linearGradient id="portfolioMiniFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={fillTop} />
+                <stop offset="100%" stopColor={fillBot} />
               </linearGradient>
             </defs>
             <polyline
               points={points}
               fill="none"
-              className={`live-chart-line ${portfolioUp ? "live-chart-line-up" : "live-chart-line-down"}`}
+              stroke={lineColor}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="live-chart-line"
             />
             <polygon
               points={`0,46 ${points} 100,46`}
@@ -163,8 +195,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* TOKEN TABLE — current holdings + recent previous tokens below */}
-      <div className="glass-panel token-table">
+      {/* TOKEN TABLE — scrollable */}
+      <div className="glass-panel token-table token-table-scroll">
         {/* Header */}
         <div className="token-header text-[10px]">
           <div>ASSET</div>
@@ -277,7 +309,7 @@ const Dashboard = () => {
                           ·{" "}
                           {new Date(token.lastSeen * 1000).toLocaleDateString(
                             undefined,
-                            { month: "short", day: "numeric" },
+                            { month: "short", day: "numeric", year: "numeric" },
                           )}
                         </>
                       )}

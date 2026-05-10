@@ -426,23 +426,23 @@ html.light .reclaim-account-card {
 
 /* Mesh / WebGraph */
 html.light .mesh-web-panel {
-    background: rgba(250, 245, 255, 0.8) !important;
-    border-color: rgba(139, 92, 246, 0.15) !important;
+    background: rgba(226, 232, 240, 0.82) !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
 }
 
 html.light .mesh-detail-card {
-    background: rgba(255, 255, 255, 0.88) !important;
-    border: 1px solid rgba(139, 92, 246, 0.12) !important;
+    background: rgba(241, 245, 249, 0.92) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
 }
 
 html.light .mesh-detail-label {
-    color: #9ca3af !important;
+    color: #6b7280 !important;
 }
 html.light .mesh-detail-value {
-    color: #1e1b4b !important;
+    color: #374151 !important;
 }
 html.light .mesh-address {
-    color: #6d28d9 !important;
+    color: #475569 !important;
 }
 
 /* Tailwind overrides for light mode */
@@ -2284,15 +2284,15 @@ html.light .prev-token-sold-badge {
     inset: 0;
 
     background-image: radial-gradient(
-        rgba(255, 255, 255, 0.08) 1px,
-        transparent 1px
+        rgba(255, 255, 255, 0.35) 1.5px,
+        transparent 1.5px
     );
 
     background-size: 26px 26px;
 
     mask-image: radial-gradient(circle at center, black, transparent 85%);
 
-    opacity: 0.32;
+    opacity: 0.8;
 
     animation: meshMove 20s linear infinite;
 }
@@ -2368,7 +2368,9 @@ html.light .prev-token-sold-badge {
 ========================================= */
 
 .mesh-node {
-    animation: nodeFloat 4s ease-in-out infinite;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .mesh-node-center {
@@ -2496,7 +2498,7 @@ html.light .prev-token-sold-badge {
 }
 
 .mesh-node:hover {
-    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.22));
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.12));
 }
 
 .mesh-node-ring {
@@ -2788,6 +2790,42 @@ html.light .prev-token-sold-badge {
     gap: 8px;
 
     flex-shrink: 0;
+}
+
+/* Sticky portfolio layout */
+.dashboard-sticky-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.value-card-sticky {
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.token-table-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.token-table-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.token-table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.token-table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.25);
+    border-radius: 4px;
 }
 
 .mini-chart {
@@ -3434,4 +3472,186 @@ html.light .token-modal-skel-desc,
 html.light .token-modal-skel-mint,
 html.light .token-modal-skel-cell {
     background: rgba(139, 92, 246, 0.06);
+}
+
+/* =========================================
+   LIGHT MODE — Missing overrides
+========================================= */
+
+/* Wallet adapter button */
+html.light .wallet-adapter-button,
+html.light .wallet-adapter-button-trigger {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.95),
+        rgba(250, 245, 255, 0.9)
+    ) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    color: #1e1b4b !important;
+}
+
+html.light .wallet-adapter-button:hover {
+    border-color: rgba(109, 40, 217, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(109, 40, 217, 0.12) !important;
+}
+
+/* Profile panels */
+html.light .profile-kpi {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-color: rgba(139, 92, 246, 0.12) !important;
+}
+
+html.light .profile-panel {
+    background: rgba(255, 255, 255, 0.68) !important;
+    border-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+html.light .profile-address {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Reclaim */
+html.light .reclaim-total-card {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+html.light .reclaim-account-card {
+    background: rgba(255, 255, 255, 0.68) !important;
+    border-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+html.light .reclaim-button {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(109, 40, 217, 0.06)) !important;
+    border-color: rgba(139, 92, 246, 0.2) !important;
+    color: #7c3aed !important;
+}
+
+html.light .reclaim-button:hover {
+    border-color: rgba(109, 40, 217, 0.4) !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Mesh controls */
+html.light .mesh-control-button {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(250, 245, 255, 0.88)) !important;
+    border-color: rgba(139, 92, 246, 0.15) !important;
+    color: #475569 !important;
+}
+
+html.light .mesh-control-button:hover {
+    border-color: rgba(139, 92, 246, 0.35) !important;
+    color: #6d28d9 !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.12) !important;
+}
+
+html.light .mesh-transaction-card {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: rgba(139, 92, 246, 0.08) !important;
+}
+
+html.light .mesh-solscan-button {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(109, 40, 217, 0.04)) !important;
+    border-color: rgba(139, 92, 246, 0.2) !important;
+    color: #7c3aed !important;
+}
+
+html.light .mesh-copy-button {
+    background: rgba(139, 92, 246, 0.06) !important;
+    color: #7c3aed !important;
+}
+
+/* Token color bar in light mode */
+html.light .token-color-bar {
+    opacity: 0.7;
+}
+
+/* Fix sketch-wallet-button for light */
+html.light .sketch-wallet-button {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(250, 245, 255, 0.9)) !important;
+    border-color: rgba(139, 92, 246, 0.2) !important;
+    color: #1e1b4b !important;
+}
+
+/* Fix reclaim warning/success in light */
+html.light .reclaim-warning {
+    background: rgba(234, 179, 8, 0.1) !important;
+    color: #b45309 !important;
+}
+
+html.light .reclaim-success {
+    background: rgba(34, 197, 94, 0.1) !important;
+    color: #16a34a !important;
+}
+
+/* Fix reclaim empty in light */
+html.light .reclaim-empty {
+    color: #6b7280 !important;
+}
+
+html.light .reclaim-empty .text-cyan-300 {
+    color: #7c3aed !important;
+}
+
+/* Fix profile token avatar in light */
+html.light .profile-token-avatar {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(167, 139, 250, 0.2)) !important;
+    border: 1px solid rgba(139, 92, 246, 0.15) !important;
+    color: #6d28d9 !important;
+}
+
+/* Fix token-logo-fallback in light */
+html.light .token-logo-fallback {
+    color: #fff !important;
+}
+
+/* Fix text-purple-400 in light */
+html.light .text-purple-400 {
+    color: #7c3aed !important;
+}
+
+/* Fix text-slate-200 in light */
+html.light .text-slate-200 {
+    color: #1e1b4b !important;
+}
+
+/* Fix bg-gray-900\\/50 inline classes in light */
+html.light [class*="bg-gray-900"],
+html.light [class*="bg-gray-800"] {
+    background: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Fix border-purple in light */
+html.light [class*="border-purple"] {
+    border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Fix border-cyan in light */
+html.light [class*="border-cyan"] {
+    border-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Fix text-cyan-300 in light */
+html.light .text-cyan-300 {
+    color: #7c3aed !important;
+}
+
+/* Fix Recharts tooltip in light */
+html.light .recharts-tooltip-wrapper {
+    color: #1e1b4b !important;
+}
+
+/* Fix reclaim-glow-card connect wallet button */
+html.light .reclaim-wallet-button {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(109, 40, 217, 0.08)) !important;
+    border-color: rgba(139, 92, 246, 0.25) !important;
+    color: #7c3aed !important;
+}
+
+/* Fix reclaim badge in light */
+html.light .reclaim-badge {
+    border-color: rgba(34, 197, 94, 0.35) !important;
+    color: #16a34a !important;
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.08) !important;
 }

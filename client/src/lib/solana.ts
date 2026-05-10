@@ -321,19 +321,21 @@ export async function getRentAccounts(
 
   try {
     const summary = await getWalletSummary(address);
-    return summary.previousTokens.map((token) => ({
-      address: token.tokenAccounts[0] ?? "",
-      mint: token.mint,
-      lamports: token.reclaimableLamports,
-      dataLength: 165,
-      rentExemptMinimum: token.reclaimableLamports,
-      reclaimable: token.reclaimableLamports > 0,
-      program: token.program ?? "SPL Token",
-      programId:
-        token.program === "Token-2022"
-          ? "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-          : "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-    }));
+    return summary.previousTokens
+      .filter((token) => token.reclaimableLamports > 0 && token.tokenAccounts.length > 0)
+      .map((token) => ({
+        address: token.tokenAccounts[0] ?? "",
+        mint: token.mint,
+        lamports: token.reclaimableLamports,
+        dataLength: 165,
+        rentExemptMinimum: token.reclaimableLamports,
+        reclaimable: token.reclaimableLamports > 0,
+        program: token.program ?? "SPL Token",
+        programId:
+          token.program === "Token-2022"
+            ? "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            : "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      }));
   } catch {
     return [];
   }
