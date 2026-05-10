@@ -4,11 +4,22 @@ A premium Solana portfolio dashboard featuring interactive wallet relationship g
 
 <img width="14203" height="7147" alt="page" src="https://github.com/user-attachments/assets/34bab93f-6780-4eaf-ae77-1597fa48016d" />
 <img width="1335" height="587" alt="image" src="https://github.com/user-attachments/assets/475df9ad-5eaa-4799-8253-e2df9b1088a8" />
-<img width="1349" height="601" alt="image" src="https://github.com/user-attachments/assets/a8562b69-8a66-4fc5-943e-35ff2801612e" />
-<img width="1335" height="594" alt="image" src="https://github.com/user-attachments/assets/dc06e737-9842-4ae2-842d-d56f932854fd" />
-<img width="1344" height="595" alt="image" src="https://github.com/user-attachments/assets/30b615c9-e263-4e92-be30-ab823d9e6a57" />
-<img width="538" height="499" alt="image" src="https://github.com/user-attachments/assets/c15dcfd5-3d68-4e1c-b1d0-16a5e568a257" />
-<img width="1343" height="603" alt="image" src="https://github.com/user-attachments/assets/520d43c0-c767-4edf-838d-de258dfffa08" />
+<img width="1351" height="612" alt="image" src="https://github.com/user-attachments/assets/b8712a79-7cb1-4624-a579-117b34760aa5" />
+<img width="1343" height="604" alt="image" src="https://github.com/user-attachments/assets/aa1fa877-9bb2-4ba8-bb4c-15301d2b0ee6" />
+<img width="1346" height="596" alt="image" src="https://github.com/user-attachments/assets/734b12f4-3ce8-43c5-bbb4-9cd9bd77be79" />
+<img width="1350" height="609" alt="image" src="https://github.com/user-attachments/assets/33134be2-1f26-4d51-ae7e-94b5372c14e1" />
+<img width="1329" height="593" alt="image" src="https://github.com/user-attachments/assets/398fc812-90b6-4681-a7a5-4242ee9a3fa7" />
+<img width="437" height="614" alt="image" src="https://github.com/user-attachments/assets/47fa5ab9-3003-4a18-9365-e5a9a2c4cd65" />
+
+
+
+
+
+
+
+
+
+
 
 #  Installation & Setup
 
