@@ -107,7 +107,7 @@ const Profile = () => {
           <div className="h-44 bg-gray-900/50 border border-gray-800 rounded-xl animate-pulse" />
         </div>
       ) : (
-        <div className="profile-content">
+        <div className="profile-content overflow-y-auto pr-1">
           <div className="profile-kpis">
             <div className="profile-kpi">
               <p className="text-gray-400 text-xs mb-0.5">24h Base</p>
@@ -155,22 +155,24 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="profile-panel">
+            <div className="profile-panel flex flex-col">
               <h2 className="text-sm font-semibold text-white mb-1">Allocation</h2>
               {tokenAllocation.length === 0 ? (
                 <p className="text-gray-500 text-center py-4 text-xs">No allocation data</p>
               ) : (
-                <div className="h-40">
+                <div className="h-[220px] w-full mt-2">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={tokenAllocation}
                         dataKey="value"
                         nameKey="name"
-                        innerRadius={38}
-                        outerRadius={62}
+                        innerRadius={45}
+                        outerRadius={70}
                         paddingAngle={2}
                         stroke="transparent"
+                        labelLine={{ stroke: "rgba(148,163,184,0.4)", strokeWidth: 1 }}
+                        label={{ fill: '#cbd5e1', fontSize: 10 }}
                       >
                         {tokenAllocation.map((entry, index) => (
                           <Cell key={entry.name} fill={chartColors[index % chartColors.length]} />
@@ -191,14 +193,14 @@ const Profile = () => {
               )}
             </div>
 
-            <div className="profile-panel">
+            <div className="profile-panel flex flex-col">
               <h2 className="text-sm font-semibold text-white mb-1">P&L Radar</h2>
               {radarData.length === 0 ? (
                 <p className="text-gray-500 text-center py-4 text-xs">No radar data</p>
               ) : (
-                <div className="h-40">
+                <div className="h-[220px] w-full mt-2">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={radarData} outerRadius={68}>
+                    <RadarChart data={radarData} outerRadius={75}>
                       <PolarGrid stroke="rgba(148,163,184,.35)" />
                       <PolarAngleAxis dataKey="token" tick={{ fill: "#cbd5e1", fontSize: 10 }} />
                       <Radar

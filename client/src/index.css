@@ -27,91 +27,91 @@
 ========================================= */
 
 html.light {
-    --bg-primary: #faf5ff;
-    --bg-secondary: #f3e8ff;
-    --panel: rgba(255, 255, 255, 0.75);
-    --border: rgba(139, 92, 246, 0.12);
-    --text: #1e1b4b;
-    --muted: #6b7280;
-    --scroll-track: rgba(233, 213, 255, 0.6);
-    --scroll-thumb: rgba(139, 92, 246, 0.45);
-    --scroll-thumb-hover: rgba(109, 40, 217, 0.65);
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --panel: rgba(255, 255, 255, 0.85);
+    --border: rgba(148, 163, 184, 0.2);
+    --text: #0f172a;
+    --muted: #64748b;
+    --scroll-track: rgba(203, 213, 225, 0.6);
+    --scroll-thumb: rgba(148, 163, 184, 0.45);
+    --scroll-thumb-hover: rgba(100, 116, 139, 0.65);
 }
 
 html.light body {
     background:
         radial-gradient(
             ellipse at top left,
-            rgba(167, 139, 250, 0.18) 0%,
+            rgba(148, 163, 184, 0.15) 0%,
             transparent 50%
         ),
         radial-gradient(
             ellipse at bottom right,
-            rgba(196, 181, 253, 0.15) 0%,
+            rgba(203, 213, 225, 0.15) 0%,
             transparent 50%
         ),
-        linear-gradient(160deg, #faf5ff 0%, #f3e8ff 50%, #ede9fe 100%);
+        linear-gradient(160deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
     color: var(--text);
 }
 
 html.light *::-webkit-scrollbar-thumb {
     background: linear-gradient(
         180deg,
-        rgba(139, 92, 246, 0.65),
-        rgba(109, 40, 217, 0.5)
+        rgba(148, 163, 184, 0.65),
+        rgba(100, 116, 139, 0.5)
     );
-    border-color: rgba(250, 245, 255, 0.8);
+    border-color: rgba(241, 245, 249, 0.8);
 }
 
 html.light *::-webkit-scrollbar-track {
-    background: rgba(233, 213, 255, 0.4);
+    background: rgba(226, 232, 240, 0.4);
 }
 
 html.light .glass-panel {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(139, 92, 246, 0.15);
+    background: rgba(241, 245, 249, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.2);
     backdrop-filter: blur(24px);
     box-shadow:
-        0 4px 32px rgba(109, 40, 217, 0.08),
-        0 1px 0 rgba(255, 255, 255, 0.9) inset,
-        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        0 4px 32px rgba(100, 116, 139, 0.06),
+        0 1px 0 rgba(255, 255, 255, 0.4) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 html.light .glass-card {
-    background: rgba(255, 255, 255, 0.68);
-    border: 1px solid rgba(139, 92, 246, 0.12);
+    background: rgba(241, 245, 249, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.15);
     backdrop-filter: blur(16px);
-    box-shadow: 0 2px 16px rgba(109, 40, 217, 0.06);
+    box-shadow: 0 2px 16px rgba(100, 116, 139, 0.04);
 }
 
 html.light .dashboard-shell {
     background:
         radial-gradient(
             ellipse at top,
-            rgba(167, 139, 250, 0.12) 0%,
+            rgba(148, 163, 184, 0.15) 0%,
             transparent 60%
         ),
         linear-gradient(
             180deg,
-            rgba(255, 255, 255, 0.85),
-            rgba(245, 240, 255, 0.9)
+            rgba(248, 250, 252, 0.8),
+            rgba(226, 232, 240, 0.8)
         );
-    border: 1px solid rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.25);
     box-shadow:
-        0 0 60px rgba(109, 40, 217, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+        0 0 60px rgba(100, 116, 139, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.3) inset;
 }
 
 html.light .navbar-container {
     background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(250, 245, 255, 0.92) 100%
+        rgba(248, 250, 252, 0.9) 0%,
+        rgba(241, 245, 249, 0.85) 100%
     );
-    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
     box-shadow:
-        0 4px 24px rgba(109, 40, 217, 0.07),
-        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+        0 4px 24px rgba(100, 116, 139, 0.05),
+        0 1px 0 rgba(255, 255, 255, 0.4) inset;
 }
 
 html.light .navbar-brand {
@@ -264,21 +264,21 @@ html.light .portfolio-down {
 
 /* Token table */
 html.light .token-table {
-    border: 1px solid rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
 html.light .token-header {
-    color: #9ca3af;
-    border-bottom-color: rgba(139, 92, 246, 0.08);
-    background: rgba(249, 245, 255, 0.5);
+    color: #64748b;
+    border-bottom-color: rgba(148, 163, 184, 0.15);
+    background: rgba(248, 250, 252, 0.95);
 }
 
 html.light .token-row {
-    border-bottom-color: rgba(139, 92, 246, 0.06);
+    border-bottom-color: rgba(148, 163, 184, 0.1);
 }
 
 html.light .token-row:hover {
-    background: rgba(237, 233, 254, 0.35);
+    background: rgba(226, 232, 240, 0.45);
 }
 
 html.light .token-name {
@@ -988,14 +988,16 @@ pre {
 
 .token-header {
     padding: 12px 14px;
-
     color: var(--muted);
-
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-
     font-size: 13px;
-
     letter-spacing: 0.08em;
+    
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
 }
 
 .token-row {
@@ -1244,6 +1246,19 @@ html.light .prev-token-sold-badge {
     height: 48px !important;
 
     color: white !important;
+}
+
+.wallet-adapter-modal-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 0 12px 0 !important;
+}
+
+.wallet-adapter-modal-list li {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* =========================================
@@ -2997,8 +3012,6 @@ html.light .prev-token-sold-badge {
 }
 
 .profile-grid {
-    flex: 1;
-    min-height: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
@@ -3009,8 +3022,6 @@ html.light .prev-token-sold-badge {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     padding: 8px;
-    min-height: 0;
-    overflow: auto;
 }
 
 .coin-shell,

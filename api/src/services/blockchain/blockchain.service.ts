@@ -163,6 +163,31 @@ const KNOWN_PROGRAMS: Record<string, ProgramInfo> = {
     name: "Jito Staking",
     category: "program",
   },
+  // ---- Common Tokens ----
+  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": {
+    name: "BONK",
+    category: "token",
+  },
+  WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCdR: {
+    name: "WEN",
+    category: "token",
+  },
+  "JUPyiwrTYaj7LrGdtZ2wrTihvc6asAmgTMsfBsh7W7S": {
+    name: "JUP",
+    category: "token",
+  },
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+    name: "USDC",
+    category: "token",
+  },
+  Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
+    name: "USDT",
+    category: "token",
+  },
+  "So11111111111111111111111111111111111111112": {
+    name: "SOL",
+    category: "token",
+  },
 };
 
 // =============================================
@@ -867,16 +892,29 @@ class BlockchainService {
     nodes.push(centerNode);
 
     // Build counterparty nodes with ring positioning
+    const nodeMetadata = await Promise.all(
+      Object.values(byCategory).flat().map(async (addr) => {
+        const stats = counterparties.get(addr)!;
+        if (stats.type === "token") {
+          return priceService.getTokenMetadata(addr).catch(() => null);
+        }
+        return null;
+      })
+    );
+
+    let metaIdx = 0;
     for (const [category, addrs] of Object.entries(byCategory)) {
       const radius = RING[category as keyof typeof RING] ?? 300;
-      addrs.forEach((addr, idx) => {
+      for (let idx = 0; idx < addrs.length; idx++) {
+        const addr = addrs[idx]!;
         const stats = counterparties.get(addr)!;
         const programInfo = stats.programInfo ?? KNOWN_PROGRAMS[addr];
+        const tokenMeta = nodeMetadata[metaIdx++];
         const pos = positionOnRing(idx, addrs.length, radius);
 
         const node: GraphNode = {
           id: addr,
-          label: programInfo?.name ?? shortLabel(addr),
+          label: programInfo?.name ?? tokenMeta?.symbol ?? shortLabel(addr),
           type: stats.type,
           category,
           val: Math.max(4, Math.min(16, stats.interactionCount * 2)),
@@ -886,7 +924,7 @@ class BlockchainService {
           ...(programInfo?.name ? { programName: programInfo.name } : {}),
         };
         nodes.push(node);
-      });
+      }
     }
 
     // 5. Build links (cap at 60)
@@ -1035,6 +1073,7 @@ class BlockchainService {
         tokenAmount?: number;
         tokenMint?: string;
         tokenDecimals?: number;
+        tokenSymbol?: string;
       }
 
       const relevantTxs: TxEntry[] = [];
@@ -1166,17 +1205,20 @@ class BlockchainService {
           tokenAmount: tokenAmount !== 0 ? Math.abs(tokenAmount) : undefined,
           tokenMint: tokenAmount !== 0 ? tokenMint : undefined,
           tokenDecimals: tokenAmount !== 0 ? tokenDecimals : undefined,
+          tokenSymbol: tokenAmount !== 0 ? (KNOWN_PROGRAMS[tokenMint]?.name ?? tokenMint.slice(0, 4).toUpperCase()) : undefined,
         });
       }
 
       // Determine label / program info for target
       const programInfo = KNOWN_PROGRAMS[targetAddress];
-      const label = programInfo?.name ?? shortLabel(targetAddress);
+      const tokenMeta = !programInfo ? await priceService.getTokenMetadata(targetAddress).catch(() => null) : null;
+      
+      const label = programInfo?.name ?? tokenMeta?.symbol ?? shortLabel(targetAddress);
       const nodeType: "wallet" | "program" | "token" = programInfo
         ? programInfo.category === "token"
           ? "token"
           : "program"
-        : "wallet";
+        : tokenMeta ? "token" : "wallet";
       const category = programInfo?.exchange ? "exchange" : nodeType;
 
       const result: InteractionDetail = {

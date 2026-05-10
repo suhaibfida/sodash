@@ -18,17 +18,7 @@ import type { GraphData, GraphNode, InteractionDetail } from "../types";
 
 import { getWalletGraph, getInteractionDetail } from "../lib/solana";
 
-const KNOWN_TOKENS: Record<string, string> = {
-  "So11111111111111111111111111111111111111112": "SOL",
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "USDC",
-  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB": "USDT",
-  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": "BONK",
-  "WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCdR": "WEN",
-  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbZedPFTEPm3": "JUP",
-  "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3GBw1xG1BqF5A": "PYTH",
-  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So": "mSOL",
-  "7dHbWXmci3dT8UFYWYZweRYvrTicR42ZE5q2S1d2r2Zp": "stSOL",
-};
+
 
 const WebGraph = () => {
   const { publicKey, connected } = useWallet();
@@ -852,12 +842,9 @@ const WebGraph = () => {
                               (sum, tx) => sum + Math.abs(tx.tokenAmount ?? 0),
                               0,
                             );
-                            const tokenMint =
-                              selectedNode.transactions?.find((tx) => tx.tokenMint)
-                                ?.tokenMint;
-                            const tokenSymbol = tokenMint 
-                                ? (KNOWN_TOKENS[tokenMint] || tokenMint.slice(0, 4).toUpperCase()) 
-                                : "TOKEN";
+                            const tokenSymbol =
+                              selectedNode.transactions?.find((tx) => tx.tokenSymbol)
+                                ?.tokenSymbol || "TOKEN";
                             return `${tokenTotal?.toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 }) ?? 0} ${tokenSymbol}`;
                           })()
                         ) : (
@@ -923,7 +910,7 @@ const WebGraph = () => {
                                   <p className="text-cyan-300 text-sm font-semibold">
                                     {tx.tokenAmount !== undefined && tx.tokenAmount !== null
                                       ? (() => {
-                                          const symbol = tx.tokenMint ? (KNOWN_TOKENS[tx.tokenMint] || tx.tokenMint.slice(0, 4).toUpperCase()) : "TOKEN";
+                                          const symbol = tx.tokenSymbol || "TOKEN";
                                           return `${Math.abs(tx.tokenAmount).toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 })} ${symbol}`;
                                         })()
                                       : `${Math.abs(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 4, maximumSignificantDigits: 6 })} SOL`}

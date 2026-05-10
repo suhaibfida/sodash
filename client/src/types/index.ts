@@ -112,6 +112,7 @@ export interface InteractionDetail {
     tokenAmount?: number;
     tokenMint?: string;
     tokenDecimals?: number;
+    tokenSymbol?: string;
   }>;
 }
 
