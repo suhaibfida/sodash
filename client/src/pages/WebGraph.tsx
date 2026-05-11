@@ -579,7 +579,7 @@ const WebGraph = () => {
 
         <div
           ref={containerRef}
-          className="mesh-web-panel relative overflow-hidden rounded-2xl border border-cyan-500/10 bg-gray-900/50"
+         className="mesh-web-panel relative overflow-hidden rounded-2xl border border-gray-400/60 dark:border-cyan-500/10 bg-gray-300/70 dark:bg-gray-900/50"
           onMouseLeave={handleMouseUp}
         >
           <div className="mesh-dot-field" aria-hidden="true" />
@@ -619,15 +619,15 @@ const WebGraph = () => {
               {/* LEGEND */}
 
               <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1 text-[10px]">
-                <span className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-amber-300">
+                <span className="legend-badge legend-exchange rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-amber-300">
                   Exchanges
                 </span>
 
-                <span className="rounded-xl bg-green-500/10 border border-green-500/20 px-3 py-2 text-green-300">
+                <span className="legend-badge legend-wallet rounded-xl bg-green-500/10 border border-green-500/20 px-3 py-2 text-green-300">
                   Wallets
                 </span>
 
-                <span className="rounded-xl bg-sky-500/10 border border-sky-500/20 px-3 py-2 text-sky-300">
+                <span className="legend-badge legend-program rounded-xl bg-sky-500/10 border border-sky-500/20 px-3 py-2 text-sky-300">
                   Programs
                 </span>
               </div>
@@ -637,7 +637,7 @@ const WebGraph = () => {
               <svg
                 ref={svgRef}
                 viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-                className="mesh-web-svg relative z-[1] h-[65vh] min-h-[350px] max-h-[700px] w-full select-none"
+                className="mesh-web-svg relative z-[1] h-[65vh] min-h-[350px] max-h-[700px] w-full select-none bg-gray-300/50 dark:bg-transparent rounded-2xl"
                 role="img"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -704,7 +704,7 @@ const WebGraph = () => {
 
               {/* CONTROLS */}
 
-              <div className="absolute right-5 top-5 z-10 flex flex-col gap-2">
+              <div className="absolute right-3 top-12 md:top-5 z-10 flex flex-col gap-2">
                 <button onClick={zoomIn} className="mesh-control-button">
                   <ZoomIn size={16} />
                 </button>

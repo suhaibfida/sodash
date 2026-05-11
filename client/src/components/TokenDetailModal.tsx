@@ -125,7 +125,7 @@ const TokenDetailModal = ({ mint, onClose }: TokenDetailModalProps) => {
 
   return (
     <div className="token-modal-overlay" onClick={onClose}>
-      <div className="token-modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="token-modal-card token-modal-responsive" onClick={(e) => e.stopPropagation()}>
         {/* ── Header ── */}
         <div className="token-modal-header">
           <span className="token-modal-title">

@@ -21,25 +21,38 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export function AIChat({ walletAddress }: AIChatProps) {
   const [isOpen, setIsOpen] = useState(false);
+
   const [messages, setMessages] = useState<Message[]>([]);
+
   const [input, setInput] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
+
   const chatRef = useRef<HTMLDivElement>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && chatRef.current && !chatRef.current.contains(event.target as Node)) {
+      if (
+        isOpen &&
+        chatRef.current &&
+        !chatRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
@@ -56,13 +69,19 @@ export function AIChat({ walletAddress }: AIChatProps) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
     setInput("");
+
     setIsLoading(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/v1/ai/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
         body: JSON.stringify({
           walletAddress,
           message: userMessage.content,
@@ -104,6 +123,7 @@ export function AIChat({ walletAddress }: AIChatProps) {
       await fetch(`${API_BASE}/api/v1/ai/chat/${walletAddress}`, {
         method: "DELETE",
       });
+
       setMessages([]);
     } catch (err) {
       console.error("Failed to clear history:", err);
@@ -137,14 +157,18 @@ export function AIChat({ walletAddress }: AIChatProps) {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-4 right-4 z-50 w-80 h-[500px] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl flex flex-col"
+            className="fixed bottom-2 right-2 z-50 w-[90vw] max-w-[290px] sm:max-w-[300px] md:max-w-[320px] lg:max-w-[340px] h-[58dvh] sm:h-[60dvh] md:h-[360px] lg:h-[400px] max-h-[78dvh] overflow-hidden bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-gray-700">
+            <div className="flex items-center justify-between p-3 border-b border-gray-700 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <h3 className="font-semibold text-white text-sm">Sodash AI</h3>
+
+                <h3 className="font-semibold text-white text-sm">
+                  Sodash AI
+                </h3>
               </div>
+
               <div className="flex items-center gap-1">
                 <button
                   onClick={clearHistory}
@@ -153,6 +177,7 @@ export function AIChat({ walletAddress }: AIChatProps) {
                 >
                   <Trash2 className="w-3.5 h-3.5 text-gray-400" />
                 </button>
+
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
@@ -163,16 +188,29 @@ export function AIChat({ walletAddress }: AIChatProps) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-3 space-y-3">
               {messages.length === 0 && (
                 <div className="text-center text-gray-500 mt-6">
                   <MessageCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                  <p className="text-xs">Ask me anything about your wallet!</p>
+
+                  <p className="text-xs">
+                    Ask me anything about your wallet!
+                  </p>
+
                   <div className="mt-3 space-y-1.5 text-[10px]">
                     <p className="text-gray-600">Try asking:</p>
-                    <p className="text-gray-500">"What's my biggest loss?"</p>
-                    <p className="text-gray-500">"Analyze my portfolio risk"</p>
-                    <p className="text-gray-500">"What is staking?"</p>
+
+                    <p className="text-gray-500">
+                      "What's my biggest loss?"
+                    </p>
+
+                    <p className="text-gray-500">
+                      "Analyze my portfolio risk"
+                    </p>
+
+                    <p className="text-gray-500">
+                      "What is staking?"
+                    </p>
                   </div>
                 </div>
               )}
@@ -181,7 +219,9 @@ export function AIChat({ walletAddress }: AIChatProps) {
                 <div
                   key={idx}
                   className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
+                    msg.role === "user"
+                      ? "justify-end"
+                      : "justify-start"
                   }`}
                 >
                   <div
@@ -191,7 +231,9 @@ export function AIChat({ walletAddress }: AIChatProps) {
                         : "bg-gray-800 text-gray-100"
                     }`}
                   >
-                    <p className="text-xs whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-xs whitespace-pre-wrap">
+                      {msg.content}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -208,18 +250,21 @@ export function AIChat({ walletAddress }: AIChatProps) {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-gray-700">
+            <div className="p-2 md:p-3 border-t border-gray-700 flex-shrink-0">
               <div className="flex gap-1.5">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && sendMessage()
+                  }
                   placeholder="Ask about your wallet..."
                   className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   disabled={isLoading}
                   maxLength={500}
                 />
+
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}

@@ -144,14 +144,18 @@ const Dashboard = () => {
     <div className="dashboard-shell dashboard-sticky-layout">
       {/* PORTFOLIO VALUE — sticky */}
       <div className="glass-panel value-card value-card-sticky">
-        <div className="value-left">
-          <div className="value-label text-xs">Portfolio Value</div>
-          <div
-            className={`value-amount text-lg ${!hasHoldings ? "text-slate-400" : portfolioUp ? "portfolio-up" : "portfolio-down"}`}
-          >
-            ${totalValue.toFixed(2)}
-          </div>
-          <div className="value-subtext text-xs">
+        <div className="value-left value-mobile-row">
+  <div className="value-price-group">
+    <div className="value-label text-xs">Portfolio Value</div>
+
+    <div
+      className={`value-amount text-lg ${!hasHoldings ? "text-slate-400" : portfolioUp ? "portfolio-up" : "portfolio-down"}`}
+    >
+      ${totalValue.toFixed(2)}
+    </div>
+  </div>
+
+  <div className="value-subtext text-xs">
             {!hasHoldings ? (
               <span className="text-slate-500">—</span>
             ) : (

@@ -12,10 +12,14 @@ import {
   Menu,
   X as XIcon,
 } from "lucide-react";
+
 import WalletButton from "./WalletButton";
 import SolPriceModal from "./SolPriceModal";
 import { getSolPrice } from "../lib/solana";
+
 import sodashLogo from "../../ds-removebg-preview.png";
+import sodashLogoLight from "../../ds-removebg-preview9.png";
+import sodashLogoMobile from "../../ds-removebg-preview10.png";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -26,31 +30,41 @@ const navItems = [
 
 const Navbar = () => {
   const location = useLocation();
+
   const { connected, publicKey } = useWallet();
+
   const [solPrice, setSolPrice] = useState<number | null>(null);
+
   const [showSolModal, setShowSolModal] = useState(false);
+
   const [profilePicture, setProfilePicture] = useState<string>("");
+
   const [mobileOpen, setMobileOpen] = useState(false);
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");
+
     return saved !== null ? JSON.parse(saved) : true;
   });
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   const getRandomProfilePicture = (): string => {
     const profiles = ["/profile1.png", "/profile2.png", "/profile3.png"];
+
     return profiles[Math.floor(Math.random() * profiles.length)];
   };
 
   useEffect(() => {
     if (!connected) {
-      // async reset so state updates happen in next tick, not synchronously in effect
       Promise.resolve().then(() => {
         setSolPrice(null);
         setProfilePicture("");
       });
+
       return;
     }
+
     if (!profilePicture) {
       Promise.resolve().then(() =>
         setProfilePicture(getRandomProfilePicture()),
@@ -58,11 +72,13 @@ const Navbar = () => {
     }
 
     let active = true;
+
     getSolPrice()
       .then((p) => {
         if (active) setSolPrice(p.usdPrice ?? null);
       })
       .catch(console.error);
+
     return () => {
       active = false;
     };
@@ -70,6 +86,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const root = document.documentElement;
+
     if (isDarkMode) {
       root.classList.add("dark");
       root.classList.remove("light");
@@ -77,24 +94,29 @@ const Navbar = () => {
       root.classList.remove("dark");
       root.classList.add("light");
     }
+
     localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
-  // Close mobile menu on route change — use transition callback to avoid direct setState in effect
   const prevPathRef = useRef(location.pathname);
+
   if (prevPathRef.current !== location.pathname) {
     prevPathRef.current = location.pathname;
+
     if (mobileOpen) setMobileOpen(false);
   }
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMobileOpen(false);
       }
     };
-    if (mobileOpen) document.addEventListener("mousedown", handler);
+
+    if (mobileOpen) {
+      document.addEventListener("mousedown", handler);
+    }
+
     return () => document.removeEventListener("mousedown", handler);
   }, [mobileOpen]);
 
@@ -107,7 +129,11 @@ const Navbar = () => {
         {/* LOGO */}
         <Link to="/" className="navbar-brand">
           <img
-            src={sodashLogo}
+            src={
+              window.innerWidth <= 320
+                ? sodashLogoMobile
+                : sodashLogoMobile
+            }
             alt="SODASH"
             className="navbar-logo-banner"
             onError={(e) => {
@@ -125,6 +151,7 @@ const Navbar = () => {
               className={`navbar-tab ${isActive(to) ? "navbar-tab-active" : ""}`}
             >
               <Icon size={15} />
+
               <span>{label}</span>
             </Link>
           ))}
@@ -132,17 +159,63 @@ const Navbar = () => {
 
         {/* RIGHT */}
         <div className="navbar-right">
-          {/* Theme Toggle */}
+          {/* Wallet */}
+          <div className="navbar-wallet">
+            <WalletButton />
+          </div>
+
+          {/* Theme Toggle - Laptop/Desktop Only */}
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="navbar-theme-toggle"
+            className="navbar-theme-toggle hidden lg:flex"
             aria-label="Toggle theme"
-            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* SOL Price — hidden on xs */}
+          {/* Profile */}
+          {connected && publicKey ? (
+            <Link
+              to="/profile"
+              className="profile-circle-btn group relative"
+              aria-label="Profile"
+              title={publicKey.toBase58()}
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-75 group-hover:opacity-100 transition-opacity blur-sm" />
+
+              <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/20">
+                <img
+                  src={profilePicture}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+
+                    const parent = e.currentTarget.parentElement;
+
+                    if (parent) {
+                      parent.style.background =
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+                    }
+                  }}
+                />
+              </div>
+            </Link>
+          ) : (
+            <Link
+              to="/profile"
+              className="profile-circle-btn group relative"
+              aria-label="Profile"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-600 to-gray-700 opacity-50 group-hover:opacity-75 transition-opacity" />
+
+              <div className="relative">
+                <User size={16} className="text-white" />
+              </div>
+            </Link>
+          )}
+
+          {/* SOL Price */}
           {connected && (
             <button
               onClick={() => setShowSolModal(true)}
@@ -156,8 +229,10 @@ const Navbar = () => {
                   e.currentTarget.style.display = "none";
                 }}
               />
+
               <div className="navbar-sol">
                 <div className="navbar-sol-label">SOL</div>
+
                 <div className="navbar-sol-price">
                   {solPrice !== null ? `$${solPrice.toFixed(2)}` : "—"}
                 </div>
@@ -165,49 +240,7 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Wallet */}
-          <div className="navbar-wallet">
-            <WalletButton />
-          </div>
-
-          {/* Profile */}
-          {connected && publicKey ? (
-            <Link
-              to="/profile"
-              className="profile-circle-btn group relative"
-              aria-label="Profile"
-              title={publicKey.toBase58()}
-            >
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-75 group-hover:opacity-100 transition-opacity blur-sm" />
-              <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/20">
-                <img
-                  src={profilePicture}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const parent = e.currentTarget.parentElement;
-                    if (parent)
-                      parent.style.background =
-                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
-                  }}
-                />
-              </div>
-            </Link>
-          ) : (
-            <Link
-              to="/profile"
-              className="profile-circle-btn group relative"
-              aria-label="Profile"
-            >
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-600 to-gray-700 opacity-50 group-hover:opacity-75 transition-opacity" />
-              <div className="relative">
-                <User size={16} className="text-white" />
-              </div>
-            </Link>
-          )}
-
-          {/* Hamburger — mobile only */}
+          {/* Hamburger */}
           <button
             className="navbar-hamburger"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -221,16 +254,7 @@ const Navbar = () => {
       {/* MOBILE DROPDOWN */}
       {mobileOpen && (
         <div className="navbar-mobile-menu">
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`navbar-mobile-tab ${isActive(to) ? "navbar-tab-active" : ""}`}
-            >
-              <Icon size={18} />
-              <span>{label}</span>
-            </Link>
-          ))}
+          {/* SOL FIRST */}
           {connected && solPrice !== null && (
             <button
               onClick={() => {
@@ -240,11 +264,35 @@ const Navbar = () => {
               className="navbar-mobile-sol"
             >
               SOL &nbsp;
+
               <span className="text-cyan-300 font-bold">
                 ${solPrice.toFixed(2)}
               </span>
             </button>
           )}
+
+          {/* NAV ITEMS */}
+          {navItems.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`navbar-mobile-tab ${isActive(to) ? "navbar-tab-active" : ""}`}
+            >
+              <Icon size={18} />
+
+              <span>{label}</span>
+            </Link>
+          ))}
+
+          {/* THEME */}
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="navbar-mobile-tab"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+
+            <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+          </button>
         </div>
       )}
 
