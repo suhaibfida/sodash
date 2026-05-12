@@ -26,7 +26,7 @@ A premium Solana portfolio dashboard featuring interactive wallet relationship g
 ## 1️⃣ Clone the repository
 
 ```bash
-curl http://localhost:3000/health
+git clone https://github.com/suhaibfida/sodash.git
 ```
 
 ✅ **Running!** See [QUICKSTART.md](./QUICKSTART.md) for details.
