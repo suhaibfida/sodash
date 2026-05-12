@@ -167,7 +167,7 @@ export async function sendVerificationSuccess(
     `• 🌅 Morning portfolio summaries\n` +
     `• 🌙 Evening recaps\n` +
     `• 🔴 Drop alerts\n\n` +
-    `Configure your schedule in the Sodash dashboard.`;
+    `Configure your schedule in the Sodash dashboard. Refresh the dashboard page if you are on mobile.`;
 
   await sendMessage(chatId, message);
 }
