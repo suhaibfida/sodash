@@ -51,13 +51,15 @@ export function createBot(): Telegraf {
     }
 
     // Store session ID for this Telegram user
-    (ctx as BotContext).session.pendingSessionId = payload;
+  // Store session ID for this Telegram user
+(ctx as BotContext).session.pendingSessionId = payload;
 
-    await ctx.reply(
-      "🔐 <b>Wallet Verification</b>\n\n" +
-      "Please enter the 6-digit OTP shown in the Sodash dashboard to link your wallet.",
-      { parse_mode: "HTML" }
-    );
+await ctx.sendChatAction("typing");
+
+await ctx.reply(
+  "🔐 Wallet Verification\n\n" +
+  "Please enter the 6-digit OTP shown in the Sodash dashboard to link your wallet."
+);
   });
 
   // =============================================
