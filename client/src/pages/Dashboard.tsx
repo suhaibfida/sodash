@@ -60,7 +60,7 @@ const Dashboard = () => {
   const recentPrev = previousTokens
     .slice()
     .sort((a, b) => b.lastSeen - a.lastSeen)
-    .slice(0, 3);
+    .slice(0, 7);
 
   // Build mini chart from real token data
   // Use weighted priceChange24h across holdings to shape the curve
