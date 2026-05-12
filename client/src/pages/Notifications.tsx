@@ -80,13 +80,30 @@ const Notifications = () => {
     verified: false,
     notificationsEnabled: false,
   });
+
   const [tgLoading, setTgLoading] = useState(false);
-  const [otp, setOtp] = useState<string | null>(null);
-  const [otpExpiry, setOtpExpiry] = useState<Date | null>(null);
-  const [botLink, setBotLink] = useState<string | null>(null);
+
+  /* RESTORE SAVED OTP FLOW */
+  const [otp, setOtp] = useState<string | null>(() => {
+    return localStorage.getItem("telegram-otp");
+  });
+
+  const [otpExpiry, setOtpExpiry] = useState<Date | null>(() => {
+    const saved = localStorage.getItem("telegram-expiry");
+
+    return saved ? new Date(saved) : null;
+  });
+
+  const [botLink, setBotLink] = useState<string | null>(() => {
+    return localStorage.getItem("telegram-bot-link");
+  });
+
   const [otpCopied, setOtpCopied] = useState(false);
+
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [revoking, setRevoking] = useState(false);
+
   const [initialLoading, setInitialLoading] = useState(true);
 
   // ---- Settings state ----
@@ -99,20 +116,32 @@ const Notifications = () => {
     alertThreshold: 10,
     notificationsEnabled: false,
   });
+
   const [settingsLoading, setSettingsLoading] = useState(false);
+
   const [settingsSaved, setSettingsSaved] = useState(false);
+
   const [tzSearch, setTzSearch] = useState("");
+
   const [tzOpen, setTzOpen] = useState(false);
+
   const tzRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (tzOpen && tzRef.current && !tzRef.current.contains(event.target as Node)) {
+      if (
+        tzOpen &&
+        tzRef.current &&
+        !tzRef.current.contains(event.target as Node)
+      ) {
         setTzOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, [tzOpen]);
 
   // =============================================
@@ -121,20 +150,25 @@ const Notifications = () => {
 
   const fetchStatus = useCallback(async () => {
     if (!walletAddress) return;
+
     setInitialLoading(true);
+
     try {
       const [statusRes, settingsRes] = await Promise.all([
         fetch(`${API_BASE}/api/v1/telegram/status/${walletAddress}`),
         fetch(`${API_BASE}/api/v1/notifications/settings/${walletAddress}`),
       ]);
-      const statusData = await statusRes.json() as { verified: boolean; telegramUsername?: string; notificationsEnabled: boolean };
-      const settingsData = await settingsRes.json() as { settings: NotificationSettings };
+
+      const statusData = await statusRes.json();
+
+      const settingsData = await settingsRes.json();
 
       setTgStatus({
         verified: statusData.verified ?? false,
         telegramUsername: statusData.telegramUsername,
         notificationsEnabled: statusData.notificationsEnabled ?? false,
       });
+
       if (settingsData.settings) {
         setSettings(settingsData.settings);
       }
@@ -157,23 +191,41 @@ const Notifications = () => {
 
   const startPolling = useCallback(() => {
     if (pollingRef.current) return;
+
     pollingRef.current = setInterval(async () => {
       if (!walletAddress) return;
+
       try {
-        const res = await fetch(`${API_BASE}/api/v1/telegram/status/${walletAddress}`);
-        const data = await res.json() as { verified: boolean; telegramUsername?: string; notificationsEnabled: boolean };
+        const res = await fetch(
+          `${API_BASE}/api/v1/telegram/status/${walletAddress}`
+        );
+
+        const data = await res.json();
+
         if (data.verified) {
           setTgStatus({
             verified: true,
             telegramUsername: data.telegramUsername,
             notificationsEnabled: data.notificationsEnabled,
           });
+
           setOtp(null);
+
           setBotLink(null);
+
           setOtpExpiry(null);
+
+          localStorage.removeItem("telegram-flow");
+
+          localStorage.removeItem("telegram-otp");
+
+          localStorage.removeItem("telegram-bot-link");
+
+          localStorage.removeItem("telegram-expiry");
+
           stopPolling();
         }
-      } catch { }
+      } catch {}
     }, 3000);
   }, [walletAddress]);
 
@@ -192,30 +244,45 @@ const Notifications = () => {
 
   const handleConnectTelegram = async () => {
     if (!walletAddress) return;
+
     setTgLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/api/v1/telegram/initiate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress }),
       });
-      const data = await res.json() as { success: boolean; otpCode: string; expiresAt: string; botLink: string; error?: string };
+
+      const data = await res.json();
 
       if (!res.ok || !data.success) {
         throw new Error(data.error ?? "Failed to initiate verification.");
       }
 
       setOtp(data.otpCode);
+
       setOtpExpiry(new Date(data.expiresAt));
+
       setBotLink(data.botLink);
 
-      // Open bot in new tab
+      /* SAVE FLOW FOR MOBILE */
+      localStorage.setItem("telegram-flow", "otp");
+
+      localStorage.setItem("telegram-otp", data.otpCode);
+
+      localStorage.setItem("telegram-bot-link", data.botLink);
+
+      localStorage.setItem("telegram-expiry", data.expiresAt);
+
+      // Open bot
       window.open(data.botLink, "_blank", "noopener,noreferrer");
 
-      // Start polling for verification
+      // Start polling
       startPolling();
     } catch (err) {
       console.error("[notifications] connect telegram error:", err);
+
       alert(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setTgLoading(false);
@@ -227,17 +294,40 @@ const Notifications = () => {
   // =============================================
 
   const handleRevoke = async () => {
-    if (!walletAddress || !confirm("Disconnect Telegram? Notifications will be disabled.")) return;
+    if (
+      !walletAddress ||
+      !confirm("Disconnect Telegram? Notifications will be disabled.")
+    )
+      return;
+
     setRevoking(true);
+
     try {
       await fetch(`${API_BASE}/api/v1/telegram/revoke`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress }),
       });
-      setTgStatus({ verified: false, notificationsEnabled: false });
+
+      setTgStatus({
+        verified: false,
+        notificationsEnabled: false,
+      });
+
       setOtp(null);
+
       setBotLink(null);
+
+      setOtpExpiry(null);
+
+      localStorage.removeItem("telegram-flow");
+
+      localStorage.removeItem("telegram-otp");
+
+      localStorage.removeItem("telegram-bot-link");
+
+      localStorage.removeItem("telegram-expiry");
+
       stopPolling();
     } catch (err) {
       console.error("[notifications] revoke error:", err);
@@ -252,15 +342,20 @@ const Notifications = () => {
 
   const handleSaveSettings = async () => {
     if (!walletAddress) return;
+
     setSettingsLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/api/v1/notifications/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress, ...settings }),
       });
+
       if (!res.ok) throw new Error("Failed to save settings.");
+
       setSettingsSaved(true);
+
       setTimeout(() => setSettingsSaved(false), 2500);
     } catch (err) {
       console.error("[notifications] save settings error:", err);
@@ -275,14 +370,23 @@ const Notifications = () => {
 
   const handleToggle = async (enabled: boolean) => {
     if (!walletAddress) return;
+
     try {
       await fetch(`${API_BASE}/api/v1/notifications/toggle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress, enabled }),
       });
-      setTgStatus((prev) => ({ ...prev, notificationsEnabled: enabled }));
-      setSettings((prev) => ({ ...prev, notificationsEnabled: enabled }));
+
+      setTgStatus((prev) => ({
+        ...prev,
+        notificationsEnabled: enabled,
+      }));
+
+      setSettings((prev) => ({
+        ...prev,
+        notificationsEnabled: enabled,
+      }));
     } catch (err) {
       console.error("[notifications] toggle error:", err);
     }
@@ -295,7 +399,9 @@ const Notifications = () => {
   const copyOtp = () => {
     if (otp) {
       navigator.clipboard.writeText(otp);
+
       setOtpCopied(true);
+
       setTimeout(() => setOtpCopied(false), 2000);
     }
   };
@@ -316,7 +422,10 @@ const Notifications = () => {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-violet-500/20">
           <Bell size={28} className="text-white" />
         </div>
-        <p className="text-gray-400 text-sm">Connect your wallet to manage notifications</p>
+
+        <p className="text-gray-400 text-sm">
+          Connect your wallet to manage notifications
+        </p>
       </div>
     );
   }
@@ -325,14 +434,13 @@ const Notifications = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
         <Loader2 size={32} className="text-violet-400 animate-spin" />
-        <p className="text-gray-400 text-sm">Loading notification settings...</p>
+
+        <p className="text-gray-400 text-sm">
+          Loading notification settings...
+        </p>
       </div>
     );
   }
-
-  // =============================================
-  // RENDER
-  // =============================================
 
   return (
     <div className="notifications-shell w-full max-w-2xl mx-auto px-1 space-y-1 min-h-screen">
@@ -457,12 +565,35 @@ const Notifications = () => {
                     Open Bot
                   </a>
                   <button
-                    onClick={() => { setOtp(null); setBotLink(null); stopPolling(); }}
+                    onClick={() => {
+  setOtp(null);
+
+  setBotLink(null);
+
+  setOtpExpiry(null);
+
+  localStorage.removeItem("telegram-flow");
+
+  localStorage.removeItem("telegram-otp");
+
+  localStorage.removeItem("telegram-bot-link");
+
+  localStorage.removeItem("telegram-expiry");
+
+  stopPolling();
+}}
                     className="flex items-center gap-1 py-1.5 px-2.5 rounded-lg bg-gray-800 text-gray-400 text-[10px] hover:text-white transition-colors"
                   >
                     Cancel
                   </button>
                 </div>
+                <p className="text-[11px] text-gray-500 text-center">
+  If Telegram opens without the Sodash bot the first time,
+  press <span className="text-[#229ED9] font-medium">Open Bot</span> again.
+</p>
+
+
+                
 
                 <div className="flex items-center gap-2 text-[12px] text-gray-500">
                   <Loader2 size={12} className="animate-spin text-violet-400" />
