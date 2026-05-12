@@ -16,9 +16,6 @@ import {
 import WalletButton from "./WalletButton";
 import SolPriceModal from "./SolPriceModal";
 import { getSolPrice } from "../lib/solana";
-
-import sodashLogo from "../../ds-removebg-preview.png";
-import sodashLogoLight from "../../ds-removebg-preview9.png";
 import sodashLogoMobile from "../../ds-removebg-preview10.png";
 
 const navItems = [
