@@ -1,6 +1,5 @@
 # sodash
-A premium Solana portfolio dashboard featuring interactive wallet relationship graphs, real-time PnL analytics, and AI-powered Telegram alerts. Built with React, Bun, and Helius.
-
+A Solana portfolio dashboard with real-time analytics, wallet relationship graphs, AI-powered insights, Telegram alerts, and SOL rent recovery. Built with React, Bun, and Helius.
 
 <img width="14203" height="7147" alt="page" src="https://github.com/user-attachments/assets/34bab93f-6780-4eaf-ae77-1597fa48016d" />
 <img width="1351" height="612" alt="image" src="https://github.com/user-attachments/assets/b8712a79-7cb1-4624-a579-117b34760aa5" />
